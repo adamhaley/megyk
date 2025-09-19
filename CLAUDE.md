@@ -101,6 +101,6 @@ The application uses:
 The dashboard displays three main analytics charts:
 1. **Finder Felix**: Shows postal code coverage (scraped vs total German postal codes)
 2. **Analysis Anna**: Shows data completeness (companies with websites/emails)
-3. **Pitch Paul**: Shows export status (placeholder for future "instantly" integration)
+3. **Pitch Paul**: Shows export status to instantly.ai (real data from exported_to_instantly field)
 
 Charts use real data from the database with fallback to placeholder data where fields don't exist yet.

@@ -33,7 +33,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   // Get companies data and unique postal codes coverage
   const { data: companies, error: companiesError } = await supabase
     .from('german_companies')
-    .select('email, website');
+    .select('email, website, exported_to_instantly');
 
   if (companiesError) {
     throw new Error(`Failed to fetch companies: ${companiesError.message}`);
@@ -56,6 +56,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const totalCompanies = companies?.length || 0;
   const companiesWithWebsite = companies?.filter(c => c.website && c.website.trim() !== '').length || 0;
   const companiesWithEmail = companies?.filter(c => c.email && c.email.trim() !== '').length || 0;
+  const companiesExportedToInstantly = companies?.filter(c => c.exported_to_instantly === true).length || 0;
 
   // Finder Felix data (postal codes coverage)
   const finderFelix = {
@@ -73,12 +74,11 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     emailPercentage: totalCompanies > 0 ? Math.round((companiesWithEmail / totalCompanies) * 100) : 0
   };
 
-  // Pitch Paul data - using placeholder since we don't have export status yet
-  // TODO: Add exported_to_instantly field to german_companies table
+  // Pitch Paul data (exported to instantly)
   const pitchPaul = {
-    totalCompanies: companiesWithEmail,
-    exportedCompanies: Math.floor(companiesWithEmail * 0.8), // Placeholder: 80% of companies with emails
-    exportPercentage: companiesWithEmail > 0 ? Math.round((Math.floor(companiesWithEmail * 0.8) / companiesWithEmail) * 100) : 0
+    totalCompanies,
+    exportedCompanies: companiesExportedToInstantly,
+    exportPercentage: totalCompanies > 0 ? Math.round((companiesExportedToInstantly / totalCompanies) * 100) : 0
   };
 
   return {

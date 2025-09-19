@@ -12,6 +12,7 @@ export interface GermanCompany {
   state: string;
   created_at: string;
   analysis: string;
+  exported_to_instantly: boolean;
 }
 
 export interface CompanyFilters {
