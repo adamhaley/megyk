@@ -53,10 +53,20 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const uniquePostalCodes = new Set(executions?.map(e => e.postal_code) || []);
   const coveredPostalCodes = uniquePostalCodes.size;
 
-  const totalCompanies = companies?.length || 0;
   const companiesWithWebsite = companies?.filter(c => c.website && c.website.trim() !== '').length || 0;
   const companiesWithEmail = companies?.filter(c => c.email && c.email.trim() !== '').length || 0;
-  const companiesExportedToInstantly = companies?.filter(c => c.exported_to_instantly === true).length || 0;
+  
+// total companies
+const { count: totalCompanies } = await supabase
+  .from('german_companies')
+  .select('*', { count: 'exact', head: true });
+
+// exported companies
+const { count: exportedCompanies } = await supabase
+  .from('german_companies')
+  .select('*', { count: 'exact', head: true })
+  .eq('exported_to_instantly', true);
+
 
   // Finder Felix data (postal codes coverage)
   const finderFelix = {
@@ -75,11 +85,16 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   };
 
   // Pitch Paul data (exported to instantly)
-  const pitchPaul = {
-    totalCompanies,
-    exportedCompanies: companiesExportedToInstantly,
-    exportPercentage: totalCompanies > 0 ? Math.round((companiesExportedToInstantly / totalCompanies) * 100) : 0
-  };
+const pitchPaul = {
+  totalCompanies: totalCompanies || 0,
+  exportedCompanies: exportedCompanies || 0,
+  exportPercentage: totalCompanies > 0
+  ? Math.max(1, Math.round((exportedCompanies / totalCompanies) * 100))
+  : 0
+
+};
+
+
 
   return {
     finderFelix,
