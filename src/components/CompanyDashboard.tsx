@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GermanCompany, CompanyFilters } from '@/types/company';
 import { getCompanies } from '@/lib/companies';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 export default function CompanyDashboard() {
   const [companies, setCompanies] = useState<GermanCompany[]>([]);
@@ -18,7 +19,7 @@ export default function CompanyDashboard() {
     limit: 20
   });
 
-  const fetchCompanies = async (resetData = false) => {
+  const fetchCompanies = useCallback(async (resetData = false) => {
     setLoading(true);
     setError(null);
     
@@ -38,17 +39,17 @@ export default function CompanyDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchCompanies(true);
-  }, [filters.search]);
+  }, [filters.search, fetchCompanies]);
 
   useEffect(() => {
     if (filters.page > 1) {
       fetchCompanies(false);
     }
-  }, [filters.page]);
+  }, [filters.page, fetchCompanies]);
 
   const handleSearch = (search: string) => {
     setFilters(prev => ({ ...prev, search, page: 1 }));
@@ -75,6 +76,8 @@ export default function CompanyDashboard() {
 
   return (
     <div className="space-y-6">
+      <AnalyticsDashboard />
+      
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>

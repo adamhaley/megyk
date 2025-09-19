@@ -71,7 +71,7 @@ export default function CompanyTable({ companies, loading, hasMore, onLoadMore }
                   </div>
                 </td>
                 <td className="py-3 px-4 text-gray-500 text-sm">
-                  {new Date(company.updated_at).toLocaleDateString('en-US', {
+                  {new Date(company.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric'
