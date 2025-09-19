@@ -37,21 +37,24 @@ const renderCustomizedLabel = (entry: unknown, centerText?: { main: string; sub:
   );
 };
 
+
+
+
 export default function AnalyticsChart({ title, subtitle, data, centerText }: AnalyticsChartProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 h-80">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+    <div className="bg-white rounded-lg shadow-sm border p-6 h-90">
+      <div className="mb-0">
+        <h3 className="text-md font-semibold text-gray-900">{title}</h3>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </div>
       
-      <div className="h-64 relative">
+      <div className="h-72 relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
-              cy="50%"
+              cy="53%"
               innerRadius={centerText ? 60 : 0}
               outerRadius={80}
               paddingAngle={2}
@@ -63,6 +66,7 @@ export default function AnalyticsChart({ title, subtitle, data, centerText }: An
             </Pie>
             <Tooltip formatter={(value, name) => [`${value}%`, name]} />
             <Legend 
+              wrapperStyle={{ fontSize: '12px', bottom: 20 }}
               verticalAlign="bottom" 
               height={36}
               iconType="circle"
