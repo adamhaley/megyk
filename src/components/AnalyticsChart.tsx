@@ -70,15 +70,6 @@ export default function AnalyticsChart({ title, subtitle, data, centerText }: An
             {centerText && renderCustomizedLabel(null, centerText)}
           </PieChart>
         </ResponsiveContainer>
-        
-        {centerText && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900">{centerText.main}</div>
-              <div className="text-sm text-gray-500">{centerText.sub}</div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
