@@ -69,3 +69,52 @@ Goal: gradually replace reliance on Google Sheets by providing a robust, profess
 
 ---
 
+Phase 2: Dashboard UI + Charts
+1. UI Foundation (Cool-Kid Skin)
+
+Add shadcn/ui (super popular with Next.js + Tailwind projects).
+
+Introduce a layout system:
+
+Sidebar nav (links: Dashboard, Companies, Charts, Settings).
+
+Top header (title, maybe a search bar, future user menu).
+
+Footer (simple copyright / version info).
+
+Standardize typography and spacing with Tailwind presets.
+
+2. Charts
+
+Use recharts (popular + simple with React + TypeScript) or chart.js with react-chartjs-2.
+Charts to implement:
+
+Total Dentists (big stat card) → just a single number, pulled from Supabase.
+
+% with Website → donut/pie chart.
+
+% with Email → donut/pie chart.
+
+% with Analysis → donut/pie chart.
+
+Optional: Stacked bar with overlap (how many have website+email+analysis).
+
+3. Company Table Improvements
+
+Add pagination (server-side or client-side).
+
+Add sortable columns (company, last_updated).
+
+Show badges for missing fields (e.g. “No Email” in red).
+
+4. Data Plumbing
+
+Reuse the Supabase client from /lib/supabase.ts.
+
+Add SQL views if necessary for chart queries (example: companies_with_email_pct).
+
+Example query for websites:
+
+SELECT 
+  COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::float / COUNT(*) * 100 AS pct_with_website
+FROM german_companies;
