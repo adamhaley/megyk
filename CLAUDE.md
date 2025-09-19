@@ -59,6 +59,7 @@ The application uses three main tables:
 - `state` (string) - German state
 - `created_at` (timestamp) - Record creation date
 - `analysis` (string) - Analysis notes
+- exported_to_instantly (boolean) - If the company has been added to instantly.ai as a Lead
 
 **`german_zip_codes`** table:
 - `id` (string) - Primary key
