@@ -77,19 +77,19 @@ const { count: exportedCompanies } = await supabase
 
   // Analysis Anna data (websites/emails populated)
   const analysisAnna = {
-    totalCompanies,
+    totalCompanies: totalCompanies || 0,
     companiesWithWebsite,
     companiesWithEmail,
-    websitePercentage: totalCompanies > 0 ? Math.round((companiesWithWebsite / totalCompanies) * 100) : 0,
-    emailPercentage: totalCompanies > 0 ? Math.round((companiesWithEmail / totalCompanies) * 100) : 0
+    websitePercentage: (totalCompanies || 0) > 0 ? Math.round((companiesWithWebsite / (totalCompanies || 1)) * 100) : 0,
+    emailPercentage: (totalCompanies || 0) > 0 ? Math.round((companiesWithEmail / (totalCompanies || 1)) * 100) : 0
   };
 
   // Pitch Paul data (exported to instantly)
 const pitchPaul = {
   totalCompanies: totalCompanies || 0,
   exportedCompanies: exportedCompanies || 0,
-  exportPercentage: totalCompanies > 0
-  ? Math.max(1, Math.round((exportedCompanies / totalCompanies) * 100))
+  exportPercentage: (totalCompanies || 0) > 0
+    ? Math.max(1, Math.round(((exportedCompanies || 0) / (totalCompanies || 1)) * 100))
   : 0
 
 };

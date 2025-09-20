@@ -72,7 +72,7 @@ export default function AnalyticsDashboard() {
       color: '#3B82F6'
     },
     {
-      name: 'Has Email',
+      name: 'Enriched',
       value: analyticsData.analysisAnna.emailPercentage,
       color: '#8B5CF6'
     },
@@ -110,17 +110,17 @@ export default function AnalyticsDashboard() {
       
       <AnalyticsChart
         title="Analysis Anna"
-        subtitle="Data Completeness"
+        subtitle="Enriched Data"
         data={analysisAnnaData}
         centerText={{
-          main: `${analyticsData.analysisAnna.totalCompanies.toLocaleString()}`,
-          sub: 'Total Companies'
+          main: `${analyticsData.analysisAnna.emailPercentage}%`,
+          sub: `(${analyticsData.analysisAnna.companiesWithEmail.toLocaleString()} enriched)`
         }}
       />
       
       <AnalyticsChart
         title="Pitch Paul"
-        subtitle="Export Status"
+        subtitle="Outreach Status"
         data={pitchPaulData}
         centerText={{
           main: `${analyticsData.pitchPaul.exportPercentage}%`,
