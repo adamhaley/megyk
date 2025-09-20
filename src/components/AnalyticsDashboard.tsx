@@ -67,12 +67,12 @@ export default function AnalyticsDashboard() {
 
   const analysisAnnaData = [
     {
-      name: 'Has Website',
+      name: 'Website Found',
       value: analyticsData.analysisAnna.websitePercentage,
       color: '#3B82F6'
     },
     {
-      name: 'Enriched',
+      name: 'Emails / Enriched',
       value: analyticsData.analysisAnna.emailPercentage,
       color: '#8B5CF6'
     },
@@ -114,7 +114,7 @@ export default function AnalyticsDashboard() {
         data={analysisAnnaData}
         centerText={{
           main: `${analyticsData.analysisAnna.emailPercentage}%`,
-          sub: `(${analyticsData.analysisAnna.companiesWithEmail.toLocaleString()} enriched)`
+          sub: `(${analyticsData.analysisAnna.companiesWithEmail.toLocaleString()} w/ emails)`
         }}
       />
       

@@ -7,7 +7,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Megyk Campaign Dashboard</h1>
-          <p className="text-gray-600 mt-2">German dental companies database</p>
+          <p className="text-gray-600 mt-2">German Dentists |  Lead Capture / Enrichment / Outreach</p>
         </header>
         
         <Suspense fallback={
