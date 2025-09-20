@@ -19,27 +19,31 @@ export default function CompanyDashboard() {
     limit: 20
   });
 
-  const fetchCompanies = useCallback(async (resetData = false) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const result = await getCompanies(filters);
-      
-      if (resetData || filters.page === 1) {
-        setCompanies(result.data);
-      } else {
-        setCompanies(prev => [...prev, ...result.data]);
-      }
-      
-      setTotalCount(result.count);
-      setHasMore(result.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch companies');
-    } finally {
-      setLoading(false);
+const fetchCompanies = useCallback(async (resetData = false) => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    const result = await getCompanies(filters);
+
+    if (resetData || filters.page === 1) {
+      setCompanies(result.data);
+    } else {
+      setCompanies(prev => {
+        const existingIds = new Set(prev.map(c => c.id));
+        return [...prev, ...result.data.filter(c => !existingIds.has(c.id))];
+      });
     }
-  }, [filters]);
+
+    setTotalCount(result.count);
+    setHasMore(result.hasMore);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to fetch companies');
+  } finally {
+    setLoading(false);
+  }
+}, [filters]);
+
 
   useEffect(() => {
     fetchCompanies(true);
