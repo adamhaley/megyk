@@ -118,3 +118,83 @@ Example query for websites:
 SELECT 
   COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::float / COUNT(*) * 100 AS pct_with_website
 FROM german_companies;
+
+Phase3:
+
+1. Add Quick Auth
+
+Since you’re already using Supabase, leverage its Auth (built-in JWT + Postgres RLS). That way you don’t add new infra.
+
+Steps:
+
+Enable Email/Password (or Magic Link) in your Supabase project (Auth → Providers).
+
+Install Supabase client in Next.js (you already did for DB).
+
+Add auth context with @supabase/auth-helpers-nextjs:
+
+yarn add @supabase/auth-helpers-nextjs
+
+
+Wrap your app in the provider (src/app/layout.tsx):
+
+import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { useState } from 'react';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+  return (
+    <html>
+      <body>
+        <SessionContextProvider supabaseClient={supabaseClient}>
+          {children}
+        </SessionContextProvider>
+      </body>
+    </html>
+  );
+}
+
+
+Create a Login page (src/app/login/page.tsx) with:
+
+'use client';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+
+export default function Login() {
+  const supabase = useSupabaseClient();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget as HTMLFormElement);
+    await supabase.auth.signInWithPassword({
+      email: form.get('email') as string,
+      password: form.get('password') as string,
+    });
+  };
+
+  return (
+    <form onSubmit={handleLogin}>
+      <input type="email" name="email" placeholder="Email" />
+      <input type="password" name="password" placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+
+Protect your dashboard route with redirect:
+
+import { redirect } from 'next/navigation';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
+export default async function DashboardLayout({ children }) {
+  const supabase = createServerComponentClient({ cookies });
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) redirect('/login');
+  return <>{children}</>;
+}
+
+

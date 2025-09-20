@@ -29,3 +29,7 @@ body {
 .recharts-surface:focus {
   outline: none !important;
 }
+
+button {
+  cursor: pointer;
+}
