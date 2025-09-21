@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 
 export default async function Home() {
-  const supabase = createServerComponentClient()
+  const supabase = await createServerComponentClient()
 
   const {
     data: { session },
