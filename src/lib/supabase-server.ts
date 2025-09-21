@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+export const dynamic = "force-dynamic"
+
 
 export const createServerComponentClient = () => {
   const cookieStore = cookies()
