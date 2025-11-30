@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import BookList from '@/components/BookList'
 import BookSearch from '@/components/BookSearch'
+import BookDropzone from '@/components/BookDropzone'
 import { getBooks } from '@/lib/books'
 import { Book } from '@/types/book'
 
@@ -72,6 +73,9 @@ export default function BooksPage() {
           Add New Book
         </Link>
       </header>
+
+      {/* Book Ingestion Dropzone */}
+      <BookDropzone onUploadSuccess={() => fetchBooks(1, searchTerm)} />
 
       {/* Search */}
       <div className="mb-6">
