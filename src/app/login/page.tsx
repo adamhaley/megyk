@@ -26,7 +26,7 @@ export default function Login() {
       if (error) {
         setError(error.message)
       } else {
-        router.push('/dashboard')
+        router.push('/books')
       }
     } catch {
       setError('An unexpected error occurred')
