@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 
 interface BookSearchProps {
   onSearch: (searchTerm: string) => void
@@ -10,14 +10,24 @@ interface BookSearchProps {
 export default function BookSearch({ onSearch, initialValue = '' }: BookSearchProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue)
 
+  // Debounced live search - triggers search 300ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearch(searchTerm)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm, onSearch])
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
+    // Search is already triggered by useEffect, but submit also works
     onSearch(searchTerm)
   }
 
   const handleClear = () => {
     setSearchTerm('')
-    onSearch('')
+    // No need to call onSearch('') - useEffect will handle it
   }
 
   return (
@@ -29,12 +39,6 @@ export default function BookSearch({ onSearch, initialValue = '' }: BookSearchPr
         placeholder="Search by title or author..."
         className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
-      <button
-        type="submit"
-        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-      >
-        Search
-      </button>
       {searchTerm && (
         <button
           type="button"

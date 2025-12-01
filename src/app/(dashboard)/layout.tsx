@@ -26,12 +26,12 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main content area - offset by sidebar width on desktop */}
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 md:ml-64 w-full overflow-x-hidden">
         {/* Mobile header with hamburger */}
         <MobileNav userEmail={session.user.email} />
 
         {/* Page content */}
-        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <main className="w-full max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>
