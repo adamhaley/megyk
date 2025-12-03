@@ -166,7 +166,6 @@ Internet → Caddy (megyk.com) → DigitalOcean Droplet
 - ⚠️ No caching layer (React Query, SWR)
 - ⚠️ No role-based access control yet
 - ⚠️ No CSV export functionality
-- ⚠️ n8n webhook URL hardcoded
 - ⚠️ Book genres table referenced but may not exist
 
 ### 10. Git Status Findings
@@ -253,14 +252,10 @@ I've updated and created the following documentation files:
    - Verify all three charts display correct data
 
 ### Short-term Enhancements
-1. **Move n8n URL to Environment Variable**
-   ```typescript
-   // In .env.local
-   N8N_WEBHOOK_URL=https://n8n.megyk.com/webhook/ingest_book
-   
-   // In route.ts
-   const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL
-   ```
+1. ✅ **Move n8n URL to Environment Variable** (COMPLETED)
+   - Base URL now in `N8N_BASE_URL` environment variable
+   - Webhook endpoint hardcoded in code as intended
+   - Includes validation to ensure env var is configured
 
 2. **Add API Route Protection**
    - Verify user is authenticated before allowing PDF uploads

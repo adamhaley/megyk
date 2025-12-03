@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Book } from '@/types/book'
 
@@ -8,9 +9,60 @@ interface BookListProps {
   loading: boolean
   hasMore: boolean
   onLoadMore: () => void
+  onBookEnriched: (enrichedBook: Book) => void
 }
 
-export default function BookList({ books, loading, hasMore, onLoadMore }: BookListProps) {
+interface EnrichingState {
+  [bookId: string]: 'idle' | 'loading' | 'success' | 'error'
+}
+
+export default function BookList({ books, loading, hasMore, onLoadMore, onBookEnriched }: BookListProps) {
+  const [enrichingState, setEnrichingState] = useState<EnrichingState>({})
+
+  const handleEnrichBook = async (bookId: string, e: React.MouseEvent) => {
+    // Prevent navigation when clicking the button
+    e.preventDefault()
+    e.stopPropagation()
+
+    setEnrichingState((prev) => ({ ...prev, [bookId]: 'loading' }))
+
+    try {
+      const response = await fetch('/api/enrich-book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bookId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to enrich book')
+      }
+
+      const result = await response.json()
+
+      // Update the book with enriched data from n8n webhook response
+      if (result.success && result.data) {
+        onBookEnriched(result.data)
+      }
+
+      setEnrichingState((prev) => ({ ...prev, [bookId]: 'success' }))
+
+      // Reset success state after 3 seconds
+      setTimeout(() => {
+        setEnrichingState((prev) => ({ ...prev, [bookId]: 'idle' }))
+      }, 3000)
+    } catch (error) {
+      console.error('Error enriching book:', error)
+      setEnrichingState((prev) => ({ ...prev, [bookId]: 'error' }))
+
+      // Reset error state after 3 seconds
+      setTimeout(() => {
+        setEnrichingState((prev) => ({ ...prev, [bookId]: 'idle' }))
+      }, 3000)
+    }
+  }
+
   if (loading && books.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -52,6 +104,9 @@ export default function BookList({ books, loading, hasMore, onLoadMore }: BookLi
                 <span>
                   {new Date(book.created_at).toLocaleDateString()}
                 </span>
+                {book.isbn && (
+                  <span>ISBN: {book.isbn}</span>
+                )}
                 {book.publication_year && (
                   <span>Published: {book.publication_year}</span>
                 )}
@@ -84,6 +139,32 @@ export default function BookList({ books, loading, hasMore, onLoadMore }: BookLi
                   Live
                 </span>
               )}
+
+              {/* Enrich Book Button */}
+              <button
+                onClick={(e) => handleEnrichBook(book.id, e)}
+                disabled={enrichingState[book.id] === 'loading'}
+                className={`
+                  px-4 py-2 rounded-md text-xs font-medium transition-colors whitespace-nowrap
+                  ${
+                    enrichingState[book.id] === 'loading'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : enrichingState[book.id] === 'success'
+                      ? 'bg-green-600 text-white'
+                      : enrichingState[book.id] === 'error'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }
+                `}
+              >
+                {enrichingState[book.id] === 'loading'
+                  ? 'Enriching...'
+                  : enrichingState[book.id] === 'success'
+                  ? '✓ Enriched'
+                  : enrichingState[book.id] === 'error'
+                  ? '✗ Failed'
+                  : 'Enrich Book'}
+              </button>
             </div>
           </div>
         </Link>

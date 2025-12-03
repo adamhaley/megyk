@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 export interface AnalyticsData {
   finderFelix: {
@@ -150,10 +151,10 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     { count: companiesWithWebsite, error: websiteError },
     { count: companiesWithEmail, error: emailError },
     { count: exportedCompanies, error: exportedError }
-  ] = results.slice(0, 5) as Array<{ count: number | null; error: any }>;
+  ] = results.slice(0, 5) as Array<{ count: number | null; error: PostgrestError | null }>;
 
   const postalCodeResult = uniquePostalCodesCount === null && results[5]
-    ? results[5] as { data: any[] | null; error: any }
+    ? results[5] as { data: Array<{ postal_code: string | null }> | null; error: PostgrestError | null }
     : { data: null, error: null };
   
   const { data: uniquePostalCodes, error: postalCodeError } = postalCodeResult;

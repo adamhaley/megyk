@@ -56,6 +56,15 @@ export default function BooksPage() {
     fetchBooks(nextPage, searchTerm, true)
   }
 
+  const handleBookEnriched = (enrichedBook: Book) => {
+    // Update the specific book in the list with enriched data
+    setBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === enrichedBook.id ? enrichedBook : book
+      )
+    )
+  }
+
   return (
     <div>
       {/* Header */}
@@ -95,6 +104,7 @@ export default function BooksPage() {
         loading={loading}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
+        onBookEnriched={handleBookEnriched}
       />
     </div>
   )

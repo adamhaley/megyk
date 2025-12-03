@@ -124,18 +124,38 @@ The application uses two separate database schemas:
 ## External Integrations
 
 ### n8n Webhook Integration
-The application integrates with n8n for book PDF processing:
-- **Webhook URL**: `https://n8n.megyk.com/webhook/ingest_book`
+The application integrates with n8n for book PDF processing and enrichment:
+
+#### 1. Book Ingestion Webhook
+- **Base URL**: Configured via `N8N_BASE_URL` environment variable
+- **Webhook Endpoint**: `/webhook/ingest_book` (hardcoded in API route)
+- **Full URL**: `${N8N_BASE_URL}/webhook/ingest_book`
 - **Purpose**: Upload and process book PDFs to extract metadata and generate summaries
 - **Flow**: BookDropzone → `/api/ingest-book` → n8n webhook → Supabase
+- **Method**: POST (multipart/form-data)
+
+#### 2. Book Enrichment Webhook
+- **Base URL**: Configured via `N8N_BASE_URL` environment variable
+- **Webhook Endpoint**: `/webhook/enrich_book` (hardcoded in API route)
+- **Full URL**: `${N8N_BASE_URL}/webhook/enrich_book`
+- **Purpose**: Enrich existing book data with additional metadata
+- **Flow**: "Enrich Book" button → `/api/enrich-book` → n8n webhook → Supabase
+- **Method**: POST (application/json)
+- **Body**: `{ "bookId": "uuid" }`
 
 ## Environment Variables
 
-Required environment variables for Supabase:
+Required environment variables:
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous/public key
+- `N8N_BASE_URL` - n8n server base URL (e.g., `https://n8n.megyk.com`)
 
-Note: The n8n webhook URL is hardcoded in `/src/app/api/ingest-book/route.ts`
+Example `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+N8N_BASE_URL=https://n8n.megyk.com
+```
 
 ## Application Routes
 
@@ -151,7 +171,8 @@ Note: The n8n webhook URL is hardcoded in `/src/app/api/ingest-book/route.ts`
 - `/sales-campaign` - Sales campaign analytics dashboard
 
 ### API Routes
-- `/api/ingest-book` - POST endpoint to forward PDF uploads to n8n
+- `/api/ingest-book` - POST endpoint to forward PDF uploads to n8n (multipart/form-data)
+- `/api/enrich-book` - POST endpoint to trigger book enrichment via n8n (JSON body with bookId)
 - `/auth/signout` - POST endpoint to handle sign out
 
 ## Navigation Structure

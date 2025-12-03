@@ -52,10 +52,10 @@ A dual-purpose [Next.js 15](https://nextjs.org) application for Megyk.com featur
 yarn install
 
 # Set up environment variables
-cp .env.example .env.local
-# Add your Supabase credentials:
+# Create .env.local with:
 # NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+# N8N_BASE_URL=https://n8n.megyk.com
 ```
 
 ### Development

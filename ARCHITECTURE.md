@@ -207,12 +207,13 @@ Client Component → useEffect → Supabase → setState → Re-render
 - Frequent user interactions
 - Real-time updates not critical
 
-### Pattern 3: API Route Proxy (PDF Upload)
+### Pattern 3: API Route Proxy (n8n Webhooks)
 
 ```
-Client → Next.js API Route → n8n Webhook → Process PDF → Update Supabase
+Client → Next.js API Route → n8n Webhook → Process → Update Supabase
 ```
 
+#### Example 1: PDF Upload
 **Flow**:
 1. User drops PDF in BookDropzone
 2. POST to `/api/ingest-book`
@@ -221,11 +222,21 @@ Client → Next.js API Route → n8n Webhook → Process PDF → Update Supabase
 5. n8n updates Supabase `books` table
 6. Client polls or gets notified of completion
 
+#### Example 2: Book Enrichment
+**Flow**:
+1. User clicks "Enrich Book" button
+2. POST to `/api/enrich-book` with `{ bookId: "uuid" }`
+3. Next.js forwards to n8n webhook
+4. n8n fetches book data and enriches it
+5. n8n updates Supabase `books` table
+6. Client shows success/error feedback
+
 **Why proxy through Next.js?**
 - Hide n8n webhook URL
 - Add authentication/validation
 - Handle CORS properly
 - Log requests
+- Centralized error handling
 
 ---
 
@@ -336,7 +347,14 @@ $$ LANGUAGE sql STABLE;
 
 ### n8n Workflow Automation
 
-**Webhook URL**: `https://n8n.megyk.com/webhook/ingest_book`
+The application integrates with n8n through two webhooks:
+
+#### 1. Book Ingestion Webhook
+
+**Base URL**: Configured via `N8N_BASE_URL` environment variable
+**Webhook Endpoint**: `/webhook/ingest_book`
+**Full URL**: `${N8N_BASE_URL}/webhook/ingest_book`
+**Method**: POST (multipart/form-data)
 
 **Purpose**: Process uploaded book PDFs and extract metadata
 
@@ -352,9 +370,43 @@ $$ LANGUAGE sql STABLE;
 5. Generate PDF summary document
 6. Return success/failure response
 
+#### 2. Book Enrichment Webhook
+
+**Base URL**: Configured via `N8N_BASE_URL` environment variable
+**Webhook Endpoint**: `/webhook/enrich_book`
+**Full URL**: `${N8N_BASE_URL}/webhook/enrich_book`
+**Method**: POST (application/json)
+**Body**: `{ "bookId": "uuid" }`
+
+**Purpose**: Enrich existing book data with additional metadata
+
+**Flow**:
+1. Receive book ID via webhook
+2. Fetch current book data from Supabase
+3. Use AI/APIs to enhance:
+   - Summary improvement
+   - Additional metadata
+   - Cover image fetching
+   - Genre refinement
+4. Update book data in Supabase
+5. Return success/failure response
+
+**Triggered by**: "Enrich Book" button on each book card
+
 **Integration Code** (`app/api/ingest-book/route.ts`):
 ```typescript
+const N8N_BASE_URL = process.env.N8N_BASE_URL
+const N8N_WEBHOOK_URL = `${N8N_BASE_URL}/webhook/ingest_book`
+
 export async function POST(request: NextRequest) {
+  // Validate environment variable
+  if (!N8N_BASE_URL) {
+    return NextResponse.json(
+      { error: 'N8N_BASE_URL environment variable is not configured' },
+      { status: 500 }
+    )
+  }
+
   const formData = await request.formData()
   
   // Forward to n8n
