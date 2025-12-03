@@ -2,6 +2,13 @@
 
 import { useState, FormEvent } from 'react'
 import { Book, BookFormData } from '@/types/book'
+import Box from '@mui/material/Box'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '@mui/material/Checkbox'
+import Stack from '@mui/material/Stack'
 
 interface BookFormProps {
   initialData?: Partial<Book>
@@ -61,101 +68,79 @@ export default function BookForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Title */}
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Title <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
+    <Box component="form" onSubmit={handleSubmit}>
+      <Stack spacing={3}>
+        {/* Title */}
+        <TextField
           id="title"
+          label="Title"
+          required
+          fullWidth
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.title ? 'border-red-500' : 'border-gray-300'
-          }`}
+          error={Boolean(errors.title)}
+          helperText={errors.title}
           disabled={isLoading}
         />
-        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-      </div>
 
-      {/* Author */}
-      <div>
-        <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
-          Author <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
+        {/* Author */}
+        <TextField
           id="author"
+          label="Author"
+          required
+          fullWidth
           value={formData.author}
           onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-          className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.author ? 'border-red-500' : 'border-gray-300'
-          }`}
+          error={Boolean(errors.author)}
+          helperText={errors.author}
           disabled={isLoading}
         />
-        {errors.author && <p className="text-red-500 text-sm mt-1">{errors.author}</p>}
-      </div>
 
-      {/* Status */}
-      <div>
-        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-          Status
-        </label>
-        <select
+        {/* Status */}
+        <TextField
           id="status"
+          label="Status"
+          select
+          fullWidth
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         >
-          <option value="draft">Draft</option>
-          <option value="processing">Processing</option>
-          <option value="ingestion_complete">Ingestion Complete</option>
-          <option value="published">Published</option>
-        </select>
-      </div>
+          <MenuItem value="draft">Draft</MenuItem>
+          <MenuItem value="processing">Processing</MenuItem>
+          <MenuItem value="ingestion_complete">Ingestion Complete</MenuItem>
+          <MenuItem value="published">Published</MenuItem>
+        </TextField>
 
-      {/* Summary */}
-      <div>
-        <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-1">
-          Summary
-        </label>
-        <textarea
+        {/* Summary */}
+        <TextField
           id="summary"
+          label="Summary"
+          multiline
+          rows={6}
+          fullWidth
           value={formData.summary}
           onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-          rows={6}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
-      </div>
 
-      {/* ISBN */}
-      <div>
-        <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-1">
-          ISBN
-        </label>
-        <input
-          type="text"
+        {/* ISBN */}
+        <TextField
           id="isbn"
+          label="ISBN"
+          fullWidth
           value={formData.isbn}
           onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
-      </div>
 
-      {/* Row: Publication Year and Page Count */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="publication_year" className="block text-sm font-medium text-gray-700 mb-1">
-            Publication Year
-          </label>
-          <input
-            type="number"
+        {/* Row: Publication Year and Page Count */}
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+          <TextField
             id="publication_year"
+            label="Publication Year"
+            type="number"
+            fullWidth
             value={formData.publication_year || ''}
             onChange={(e) =>
               setFormData({
@@ -163,18 +148,14 @@ export default function BookForm({
                 publication_year: e.target.value ? parseInt(e.target.value) : undefined,
               })
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
-        </div>
 
-        <div>
-          <label htmlFor="page_count" className="block text-sm font-medium text-gray-700 mb-1">
-            Page Count
-          </label>
-          <input
-            type="number"
+          <TextField
             id="page_count"
+            label="Page Count"
+            type="number"
+            fullWidth
             value={formData.page_count || ''}
             onChange={(e) =>
               setFormData({
@@ -182,75 +163,75 @@ export default function BookForm({
                 page_count: e.target.value ? parseInt(e.target.value) : undefined,
               })
             }
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
-        </div>
-      </div>
+        </Stack>
 
-      {/* Cover Image URL */}
-      <div>
-        <label htmlFor="cover_image_url" className="block text-sm font-medium text-gray-700 mb-1">
-          Cover Image URL
-        </label>
-        <input
-          type="url"
+        {/* Cover Image URL */}
+        <TextField
           id="cover_image_url"
+          label="Cover Image URL"
+          type="url"
+          fullWidth
           value={formData.cover_image_url}
           onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
-      </div>
 
-      {/* Summary PDF URL */}
-      <div>
-        <label htmlFor="default_summary_pdf_url" className="block text-sm font-medium text-gray-700 mb-1">
-          Summary PDF URL
-        </label>
-        <input
-          type="url"
+        {/* Summary PDF URL */}
+        <TextField
           id="default_summary_pdf_url"
+          label="Summary PDF URL"
+          type="url"
+          fullWidth
           value={formData.default_summary_pdf_url}
           onChange={(e) => setFormData({ ...formData, default_summary_pdf_url: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
-      </div>
 
-      {/* Live Checkbox */}
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="live"
-          checked={formData.live}
-          onChange={(e) => setFormData({ ...formData, live: e.target.checked })}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          disabled={isLoading}
+        {/* Live Checkbox */}
+        <FormControlLabel
+          control={
+            <Checkbox
+              id="live"
+              checked={formData.live}
+              onChange={(e) => setFormData({ ...formData, live: e.target.checked })}
+              disabled={isLoading}
+            />
+          }
+          label="Mark as Live"
         />
-        <label htmlFor="live" className="ml-2 block text-sm text-gray-700">
-          Mark as Live
-        </label>
-      </div>
 
-      {/* Form Actions */}
-      <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={isLoading}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50"
+        {/* Form Actions */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 2,
+            pt: 3,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
         >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-        >
-          {isLoading ? 'Saving...' : 'Save'}
-        </button>
-      </div>
-    </form>
+          <Button
+            type="button"
+            variant="outlined"
+            onClick={onCancel}
+            disabled={isLoading}
+            size="large"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={isLoading}
+            size="large"
+          >
+            {isLoading ? 'Saving...' : 'Save'}
+          </Button>
+        </Box>
+      </Stack>
+    </Box>
   )
 }

@@ -3,6 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Book } from '@/types/book'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import Stack from '@mui/material/Stack'
 
 interface BookListProps {
   books: Book[]
@@ -65,123 +73,163 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
 
   if (loading && books.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 256 }}>
+        <CircularProgress />
+      </Box>
     )
   }
 
   if (!loading && books.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">No books found</p>
-      </div>
+      <Box sx={{ textAlign: 'center', py: 12 }}>
+        <Typography variant="h6" color="text.secondary">
+          No books found
+        </Typography>
+      </Box>
     )
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ingestion_complete':
+        return 'success'
+      case 'processing':
+        return 'warning'
+      default:
+        return 'default'
+    }
+  }
+
+  const getEnrichButtonProps = (state: 'idle' | 'loading' | 'success' | 'error') => {
+    switch (state) {
+      case 'loading':
+        return { color: 'inherit' as const, variant: 'contained' as const, disabled: true }
+      case 'success':
+        return { color: 'success' as const, variant: 'contained' as const }
+      case 'error':
+        return { color: 'error' as const, variant: 'contained' as const }
+      default:
+        return { color: 'secondary' as const, variant: 'contained' as const }
+    }
+  }
+
   return (
-    <div className="space-y-4">
+    <Stack spacing={2}>
       {books.map((book) => (
-        <Link
+        <Card
           key={book.id}
+          component={Link}
           href={`/books/${book.id}`}
-          className="block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:bg-gray-50 transition-colors"
+          sx={{
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            '&:hover': {
+              bgcolor: 'action.hover',
+              transform: 'translateY(-2px)',
+              boxShadow: 2,
+            },
+          }}
         >
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {book.title}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">by {book.author}</p>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
+              <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
+                <Typography variant="h6" component="h3" noWrap gutterBottom>
+                  {book.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  by {book.author}
+                </Typography>
 
-              {book.summary && (
-                <p className="text-sm text-gray-700 mt-3 line-clamp-2">
-                  {book.summary}
-                </p>
-              )}
-
-              <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
-                <span>
-                  {new Date(book.created_at).toLocaleDateString()}
-                </span>
-                {book.isbn && (
-                  <span>ISBN: {book.isbn}</span>
+                {book.summary && (
+                  <Typography
+                    variant="body2"
+                    color="text.primary"
+                    sx={{
+                      mt: 2,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {book.summary}
+                  </Typography>
                 )}
-                {book.publication_year && (
-                  <span>Published: {book.publication_year}</span>
+
+                <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(book.created_at).toLocaleDateString()}
+                  </Typography>
+                  {book.isbn && (
+                    <Typography variant="caption" color="text.secondary">
+                      ISBN: {book.isbn}
+                    </Typography>
+                  )}
+                  {book.publication_year && (
+                    <Typography variant="caption" color="text.secondary">
+                      Published: {book.publication_year}
+                    </Typography>
+                  )}
+                  {book.page_count && (
+                    <Typography variant="caption" color="text.secondary">
+                      {book.page_count} pages
+                    </Typography>
+                  )}
+                </Stack>
+              </Box>
+
+              <Stack spacing={1} alignItems="flex-end" sx={{ minWidth: 'fit-content' }}>
+                {/* Status Badge */}
+                <Chip
+                  label={book.status}
+                  color={getStatusColor(book.status)}
+                  size="small"
+                />
+
+                {/* Live Badge */}
+                {book.live && (
+                  <Chip
+                    label="Live"
+                    color="primary"
+                    size="small"
+                  />
                 )}
-                {book.page_count && (
-                  <span>{book.page_count} pages</span>
-                )}
-              </div>
-            </div>
 
-            <div className="flex flex-col items-end gap-2 ml-4">
-              {/* Status Badge */}
-              <span
-                className={`
-                  px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap
-                  ${
-                    book.status === 'ingestion_complete'
-                      ? 'bg-green-100 text-green-800'
-                      : book.status === 'processing'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }
-                `}
-              >
-                {book.status}
-              </span>
-
-              {/* Live Badge */}
-              {book.live && (
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
-                  Live
-                </span>
-              )}
-
-              {/* Enrich Book Button */}
-              <button
-                onClick={(e) => handleEnrichBook(book.id, e)}
-                disabled={enrichingState[book.id] === 'loading'}
-                className={`
-                  px-4 py-2 rounded-md text-xs font-medium transition-colors whitespace-nowrap
-                  ${
-                    enrichingState[book.id] === 'loading'
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : enrichingState[book.id] === 'success'
-                      ? 'bg-green-600 text-white'
-                      : enrichingState[book.id] === 'error'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
-                  }
-                `}
-              >
-                {enrichingState[book.id] === 'loading'
-                  ? 'Enriching...'
-                  : enrichingState[book.id] === 'success'
-                  ? '✓ Enriched'
-                  : enrichingState[book.id] === 'error'
-                  ? '✗ Failed'
-                  : 'Enrich Book'}
-              </button>
-            </div>
-          </div>
-        </Link>
+                {/* Enrich Book Button */}
+                <Button
+                  onClick={(e) => handleEnrichBook(book.id, e)}
+                  disabled={enrichingState[book.id] === 'loading'}
+                  size="small"
+                  {...getEnrichButtonProps(enrichingState[book.id] || 'idle')}
+                  sx={{ minWidth: 120 }}
+                >
+                  {enrichingState[book.id] === 'loading'
+                    ? 'Enriching...'
+                    : enrichingState[book.id] === 'success'
+                    ? '✓ Enriched'
+                    : enrichingState[book.id] === 'error'
+                    ? '✗ Failed'
+                    : 'Enrich Book'}
+                </Button>
+              </Stack>
+            </Box>
+          </CardContent>
+        </Card>
       ))}
 
       {/* Load More Button */}
       {hasMore && (
-        <div className="flex justify-center pt-6">
-          <button
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 3 }}>
+          <Button
             onClick={onLoadMore}
             disabled={loading}
-            className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            variant="outlined"
+            size="large"
           >
             {loading ? 'Loading...' : 'Load More'}
-          </button>
-        </div>
+          </Button>
+        </Box>
       )}
-    </div>
+    </Stack>
   )
 }
