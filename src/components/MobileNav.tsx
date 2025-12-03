@@ -3,7 +3,22 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpenIcon, ChartBarIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import AppBar from '@mui/material/AppBar'
+import Toolbar from '@mui/material/Toolbar'
+import IconButton from '@mui/material/IconButton'
+import Typography from '@mui/material/Typography'
+import Drawer from '@mui/material/Drawer'
+import Box from '@mui/material/Box'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Button from '@mui/material/Button'
+import MenuIcon from '@mui/icons-material/Menu'
+import CloseIcon from '@mui/icons-material/Close'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import BarChartIcon from '@mui/icons-material/BarChart'
 
 interface MobileNavProps {
   userEmail: string | undefined
@@ -13,12 +28,12 @@ const navigationLinks = [
   {
     name: 'Book Summaries',
     href: '/books',
-    icon: BookOpenIcon,
+    icon: MenuBookIcon,
   },
   {
     name: 'Sales Campaign',
     href: '/sales-campaign',
-    icon: ChartBarIcon,
+    icon: BarChartIcon,
   },
 ]
 
@@ -31,117 +46,156 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
     setIsOpen(false)
   }, [pathname])
 
-  // Close menu on ESC key
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEsc)
-      // Prevent body scroll when menu is open
-      document.body.style.overflow = 'hidden'
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEsc)
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between h-16 px-4">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
-            aria-label="Open menu"
-          >
-            <Bars3Icon className="h-6 w-6" />
-          </button>
-          <h1 className="text-lg font-bold text-gray-900">Megyk</h1>
-          <div className="w-10" /> {/* Spacer for centering */}
-        </div>
-      </div>
-
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Sliding Menu */}
-      <div
-        className={`
-          fixed top-0 left-0 h-full w-64 bg-white z-60 shadow-xl
-          transform transition-transform duration-300 ease-in-out md:hidden
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          bgcolor: 'background.paper',
+          color: 'text.primary',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
       >
-        <div className="flex flex-col h-full">
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="Open menu"
+            onClick={() => setIsOpen(true)}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" component="h1" fontWeight="bold" sx={{ flexGrow: 1, textAlign: 'center' }}>
+            Megyk
+          </Typography>
+          <Box sx={{ width: 48 }} /> {/* Spacer for centering */}
+        </Toolbar>
+      </AppBar>
+
+      {/* Sliding Drawer Menu */}
+      <Drawer
+        anchor="left"
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           {/* Header with close button */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Megyk</h2>
-            <button
+          <Box
+            sx={{
+              height: 64,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 3,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Typography variant="h5" component="h2" fontWeight="bold">
+              Megyk
+            </Typography>
+            <IconButton
               onClick={() => setIsOpen(false)}
-              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
               aria-label="Close menu"
+              size="small"
             >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
           {/* Navigation Links */}
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            {navigationLinks.map((link) => {
-              const isActive = pathname.startsWith(link.href)
-              const Icon = link.icon
+          <Box sx={{ flex: 1, py: 3 }}>
+            <List sx={{ px: 2 }}>
+              {navigationLinks.map((link) => {
+                const isActive = pathname.startsWith(link.href)
+                const Icon = link.icon
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`
-                    flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors
-                    ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700 -ml-4 pl-4'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5 mr-3" />
-                  {link.name}
-                </Link>
-              )
-            })}
-          </nav>
+                return (
+                  <ListItem key={link.href} disablePadding sx={{ mb: 0.5 }}>
+                    <ListItemButton
+                      component={Link}
+                      href={link.href}
+                      selected={isActive}
+                      sx={{
+                        borderRadius: 1.5,
+                        '&.Mui-selected': {
+                          bgcolor: 'rgba(37, 99, 235, 0.08)',
+                          color: 'primary.main',
+                          borderLeft: '4px solid',
+                          borderColor: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'rgba(37, 99, 235, 0.12)',
+                          },
+                        },
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 40,
+                          color: isActive ? 'primary.main' : 'text.secondary',
+                        }}
+                      >
+                        <Icon />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={link.name}
+                        primaryTypographyProps={{
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                )
+              })}
+            </List>
+          </Box>
 
           {/* User info + Sign out */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex flex-col space-y-3">
-              <span className="text-sm text-gray-700 truncate" title={userEmail}>
+          <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              <Typography
+                variant="body2"
+                color="text.primary"
+                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                title={userEmail}
+              >
                 {userEmail}
-              </span>
+              </Typography>
               <form action="/auth/signout" method="post">
-                <button
+                <Button
                   type="submit"
-                  className="w-full text-left text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  fullWidth
+                  size="small"
+                  sx={{
+                    justifyContent: 'flex-start',
+                    color: 'text.secondary',
+                    textTransform: 'none',
+                    fontWeight: 400,
+                    '&:hover': {
+                      color: 'text.primary',
+                      bgcolor: 'action.hover',
+                    },
+                  }}
                 >
                   Sign out
-                </button>
+                </Button>
               </form>
-            </div>
-          </div>
-        </div>
-      </div>
+            </Box>
+          </Box>
+        </Box>
+      </Drawer>
     </>
   )
 }

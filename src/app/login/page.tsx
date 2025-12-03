@@ -3,6 +3,14 @@
 import { useState } from 'react'
 import { useSupabase } from '@/components/supabase-provider'
 import { useRouter } from 'next/navigation'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Alert from '@mui/material/Alert'
+import Typography from '@mui/material/Typography'
+import Stack from '@mui/material/Stack'
 
 export default function Login() {
   const { supabase } = useSupabase()
@@ -36,61 +44,75 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        py: { xs: 6, sm: 12 },
+        px: { xs: 2, sm: 3 },
+      }}
+    >
+      <Card sx={{ maxWidth: 480, width: '100%' }}>
+        <CardContent sx={{ p: 4 }}>
+          <Box sx={{ mb: 4, textAlign: 'center' }}>
+            <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+              Sign in to Megyk
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Enter your credentials to access the dashboard
+            </Typography>
+          </Box>
+
+          <form onSubmit={handleLogin}>
+            <Stack spacing={3}>
+              <TextField
                 id="email"
                 name="email"
+                label="Email address"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                fullWidth
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
+
+              <TextField
                 id="password"
                 name="password"
+                label="Password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                fullWidth
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
-            </div>
-          </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-800">{error}</div>
-            </div>
-          )}
+              {error && (
+                <Alert severity="error" variant="filled">
+                  {error}
+                </Alert>
+              )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={loading}
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </Button>
+            </Stack>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }

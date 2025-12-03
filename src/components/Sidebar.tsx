@@ -2,7 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpenIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import Box from '@mui/material/Box'
+import Drawer from '@mui/material/Drawer'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import BarChartIcon from '@mui/icons-material/BarChart'
 
 interface SidebarProps {
   userEmail: string | undefined
@@ -12,12 +22,12 @@ const navigationLinks = [
   {
     name: 'Book Summaries',
     href: '/books',
-    icon: BookOpenIcon,
+    icon: MenuBookIcon,
   },
   {
     name: 'Sales Campaign',
     href: '/sales-campaign',
-    icon: ChartBarIcon,
+    icon: BarChartIcon,
   },
 ]
 
@@ -25,54 +35,117 @@ export default function Sidebar({ userEmail }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
-      {/* Header */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Megyk</h2>
-      </div>
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: 280,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: 280,
+          boxSizing: 'border-box',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Header */}
+        <Box
+          sx={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            px: 3,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography variant="h5" component="h2" fontWeight="bold">
+            Megyk
+          </Typography>
+        </Box>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-4 py-6 space-y-1">
-        {navigationLinks.map((link) => {
-          const isActive = pathname.startsWith(link.href)
-          const Icon = link.icon
+        {/* Navigation Links */}
+        <Box sx={{ flex: 1, py: 3 }}>
+          <List sx={{ px: 2 }}>
+            {navigationLinks.map((link) => {
+              const isActive = pathname.startsWith(link.href)
+              const Icon = link.icon
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`
-                flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors
-                ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700 -ml-4 pl-4'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }
-              `}
+              return (
+                <ListItem key={link.href} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    component={Link}
+                    href={link.href}
+                    selected={isActive}
+                    sx={{
+                      borderRadius: 1.5,
+                      '&.Mui-selected': {
+                        bgcolor: 'rgba(37, 99, 235, 0.08)', // primary with opacity
+                        color: 'primary.main',
+                        borderLeft: '4px solid',
+                        borderColor: 'primary.main',
+                        '&:hover': {
+                          bgcolor: 'rgba(37, 99, 235, 0.12)',
+                        },
+                      },
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 40,
+                        color: isActive ? 'primary.main' : 'text.secondary',
+                      }}
+                    >
+                      <Icon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={link.name}
+                      primaryTypographyProps={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              )
+            })}
+          </List>
+        </Box>
+
+        {/* User info + Sign out */}
+        <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Typography
+              variant="body2"
+              color="text.primary"
+              sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+              title={userEmail}
             >
-              <Icon className="h-5 w-5 mr-3" />
-              {link.name}
-            </Link>
-          )
-        })}
-      </nav>
-
-      {/* User info + Sign out */}
-      <div className="border-t border-gray-200 p-4">
-        <div className="flex flex-col space-y-3">
-          <span className="text-sm text-gray-700 truncate" title={userEmail}>
-            {userEmail}
-          </span>
-          <form action="/auth/signout" method="post">
-            <button
-              type="submit"
-              className="w-full text-left text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+              {userEmail}
+            </Typography>
+            <form action="/auth/signout" method="post">
+              <Button
+                type="submit"
+                fullWidth
+                size="small"
+                sx={{
+                  justifyContent: 'flex-start',
+                  color: 'text.secondary',
+                  textTransform: 'none',
+                  fontWeight: 400,
+                  '&:hover': {
+                    color: 'text.primary',
+                    bgcolor: 'action.hover',
+                  },
+                }}
+              >
+                Sign out
+              </Button>
+            </form>
+          </Box>
+        </Box>
+      </Box>
+    </Drawer>
   )
 }
