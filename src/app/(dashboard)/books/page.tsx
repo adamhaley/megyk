@@ -7,6 +7,12 @@ import BookSearch from '@/components/BookSearch'
 import BookDropzone from '@/components/BookDropzone'
 import { getBooks } from '@/lib/books'
 import { Book } from '@/types/book'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import Alert from '@mui/material/Alert'
+import AddIcon from '@mui/icons-material/Add'
 
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([])
@@ -66,36 +72,47 @@ export default function BooksPage() {
   }
 
   return (
-    <div>
+    <Box>
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Book Summaries</h1>
-          <p className="text-gray-600 mt-2">
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        spacing={2}
+        sx={{ mb: 4 }}
+      >
+        <Box>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Book Summaries
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Manage your book collection
-          </p>
-        </div>
-        <Link
+          </Typography>
+        </Box>
+        <Button
+          component={Link}
           href="/books/new"
-          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-center"
+          variant="contained"
+          size="large"
+          startIcon={<AddIcon />}
         >
           Add New Book
-        </Link>
-      </header>
+        </Button>
+      </Stack>
 
       {/* Book Ingestion Dropzone */}
       <BookDropzone onUploadSuccess={() => fetchBooks(1, searchTerm)} />
 
       {/* Search */}
-      <div className="mb-6">
+      <Box sx={{ mb: 3 }}>
         <BookSearch onSearch={handleSearch} initialValue={searchTerm} />
-      </div>
+      </Box>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-600">{error}</p>
-        </div>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
       )}
 
       {/* Book List */}
@@ -106,6 +123,6 @@ export default function BooksPage() {
         onLoadMore={handleLoadMore}
         onBookEnriched={handleBookEnriched}
       />
-    </div>
+    </Box>
   )
 }

@@ -1,7 +1,16 @@
 'use client'
 
 import { useState, useCallback, DragEvent, ChangeEvent } from 'react'
-import { ArrowUpTrayIcon, DocumentIcon, CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Paper from '@mui/material/Paper'
+import CircularProgress from '@mui/material/CircularProgress'
+import Stack from '@mui/material/Stack'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
+import DescriptionIcon from '@mui/icons-material/Description'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorIcon from '@mui/icons-material/Error'
+import WarningIcon from '@mui/icons-material/Warning'
 
 const ACCEPTED_FILE_TYPES = ['.epub', '.mobi', '.pdf']
 const UPLOAD_API_URL = '/api/ingest-book'
@@ -149,95 +158,136 @@ export default function BookDropzone({ onUploadSuccess }: BookDropzoneProps) {
   }
 
   return (
-    <div className="mb-8">
-      <div
+    <Box sx={{ mb: 4 }}>
+      <Paper
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`
-          relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-          ${isDragging
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-white hover:border-gray-400'
-          }
-          ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        `}
+        variant="outlined"
+        sx={{
+          position: 'relative',
+          border: '2px dashed',
+          borderColor: isDragging ? 'primary.main' : 'divider',
+          bgcolor: isDragging ? 'rgba(37, 99, 235, 0.08)' : 'background.paper',
+          p: 6,
+          textAlign: 'center',
+          transition: 'all 0.2s',
+          cursor: isUploading ? 'not-allowed' : 'pointer',
+          opacity: isUploading ? 0.5 : 1,
+          '&:hover': isUploading ? {} : {
+            borderColor: 'primary.light',
+            bgcolor: 'action.hover',
+          },
+        }}
       >
         <input
           type="file"
           id="file-upload"
-          className="hidden"
+          style={{ display: 'none' }}
           accept={ACCEPTED_FILE_TYPES.join(',')}
           onChange={handleFileInput}
           disabled={isUploading}
         />
 
-        <label
+        <Box
+          component="label"
           htmlFor="file-upload"
-          className={`flex flex-col items-center ${isUploading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            cursor: isUploading ? 'not-allowed' : 'pointer',
+          }}
         >
           {uploadStatus === 'idle' && !isUploading && (
             <>
-              <ArrowUpTrayIcon className="h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-900 mb-2">
+              <UploadFileIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
                 Drop book files here or click to upload
-              </p>
-              <p className="text-sm text-gray-500">
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Accepts EPUB, MOBI, and PDF files (max 100MB)
-              </p>
+              </Typography>
             </>
           )}
 
           {isUploading && (
             <>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-lg font-medium text-gray-900 mb-2">Uploading...</p>
-              <p className="text-sm text-gray-500">{statusMessage}</p>
+              <CircularProgress size={48} sx={{ mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                Uploading...
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {statusMessage}
+              </Typography>
             </>
           )}
 
           {uploadStatus === 'success' && !isUploading && (
             <>
-              <CheckCircleIcon className="h-12 w-12 text-green-500 mb-4" />
-              <p className="text-lg font-medium text-green-900 mb-2">Upload Successful!</p>
-              <p className="text-sm text-green-600">{statusMessage}</p>
+              <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
+              <Typography variant="h6" color="success.dark" gutterBottom>
+                Upload Successful!
+              </Typography>
+              <Typography variant="body2" color="success.main">
+                {statusMessage}
+              </Typography>
             </>
           )}
 
           {uploadStatus === 'warning' && !isUploading && (
             <>
-              <ExclamationTriangleIcon className="h-12 w-12 text-amber-500 mb-4" />
-              <p className="text-lg font-medium text-amber-900 mb-2">File Already Exists</p>
-              <p className="text-sm text-amber-600">{statusMessage}</p>
+              <WarningIcon sx={{ fontSize: 48, color: 'warning.main', mb: 2 }} />
+              <Typography variant="h6" color="warning.dark" gutterBottom>
+                File Already Exists
+              </Typography>
+              <Typography variant="body2" color="warning.main">
+                {statusMessage}
+              </Typography>
             </>
           )}
 
           {uploadStatus === 'error' && !isUploading && (
             <>
-              <XCircleIcon className="h-12 w-12 text-red-500 mb-4" />
-              <p className="text-lg font-medium text-red-900 mb-2">Upload Failed</p>
-              <p className="text-sm text-red-600">{statusMessage}</p>
+              <ErrorIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
+              <Typography variant="h6" color="error.dark" gutterBottom>
+                Upload Failed
+              </Typography>
+              <Typography variant="body2" color="error.main">
+                {statusMessage}
+              </Typography>
             </>
           )}
-        </label>
-      </div>
+        </Box>
+      </Paper>
 
       {/* File Type Info */}
-      <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-500">
-        <div className="flex items-center gap-1">
-          <DocumentIcon className="h-4 w-4" />
-          <span>EPUB</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <DocumentIcon className="h-4 w-4" />
-          <span>MOBI</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <DocumentIcon className="h-4 w-4" />
-          <span>PDF</span>
-        </div>
-      </div>
-    </div>
+      <Stack
+        direction="row"
+        spacing={3}
+        justifyContent="center"
+        sx={{ mt: 2 }}
+      >
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <DescriptionIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+          <Typography variant="caption" color="text.secondary">
+            EPUB
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <DescriptionIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+          <Typography variant="caption" color="text.secondary">
+            MOBI
+          </Typography>
+        </Stack>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <DescriptionIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+          <Typography variant="caption" color="text.secondary">
+            PDF
+          </Typography>
+        </Stack>
+      </Stack>
+    </Box>
   )
 }

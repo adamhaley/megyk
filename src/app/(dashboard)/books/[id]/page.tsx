@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation'
 import BookDetail from '@/components/BookDetail'
 import { getBookById } from '@/lib/books'
 import { Book } from '@/types/book'
+import Stack from '@mui/material/Stack'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
 
 export default function BookDetailPage() {
   const params = useParams()
@@ -31,26 +34,18 @@ export default function BookDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <Stack alignItems="center" justifyContent="center" sx={{ height: 256 }}>
+        <CircularProgress />
+      </Stack>
     )
   }
 
   if (error) {
-    return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-md">
-        <p className="text-red-600">{error}</p>
-      </div>
-    )
+    return <Alert severity="error">{error}</Alert>
   }
 
   if (!book) {
-    return (
-      <div className="p-6 bg-gray-50 border border-gray-200 rounded-md">
-        <p className="text-gray-600">Book not found</p>
-      </div>
-    )
+    return <Alert severity="warning">Book not found</Alert>
   }
 
   return <BookDetail book={book} />

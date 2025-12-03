@@ -6,6 +6,12 @@ import Link from 'next/link'
 import BookForm from '@/components/BookForm'
 import { createBook } from '@/lib/books'
 import { BookFormData } from '@/types/book'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Alert from '@mui/material/Alert'
+import Paper from '@mui/material/Paper'
+import MuiLink from '@mui/material/Link'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 export default function NewBookPage() {
   const router = useRouter()
@@ -31,32 +37,44 @@ export default function NewBookPage() {
   }
 
   return (
-    <div>
+    <Box>
       {/* Header */}
-      <header className="mb-8">
-        <Link
+      <Box sx={{ mb: 4 }}>
+        <MuiLink
+          component={Link}
           href="/books"
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors mb-4 inline-block"
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            mb: 2,
+            textDecoration: 'none',
+            color: 'text.secondary',
+            '&:hover': { color: 'text.primary' },
+          }}
         >
-          ← Back to Books
-        </Link>
-        <h1 className="text-3xl font-bold text-gray-900">Add New Book</h1>
-        <p className="text-gray-600 mt-2">
+          <ArrowBackIcon fontSize="small" />
+          Back to Books
+        </MuiLink>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Add New Book
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
           Create a new book entry in your collection
-        </p>
-      </header>
+        </Typography>
+      </Box>
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-600">{error}</p>
-        </div>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
       )}
 
       {/* Form */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <Paper sx={{ p: 4 }}>
         <BookForm onSubmit={handleSubmit} onCancel={handleCancel} isLoading={isLoading} />
-      </div>
-    </div>
+      </Paper>
+    </Box>
   )
 }

@@ -1,21 +1,29 @@
 import { Suspense } from 'react';
 import CompanyDashboard from '@/components/CompanyDashboard';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
 
 export default function DashboardPage() {
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Campaign Dashboard</h1>
-        <p className="text-gray-600 mt-2">German Dentists | Lead Capture / Enrichment / Outreach</p>
-      </header>
+    <Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Campaign Dashboard
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          German Dentists | Lead Capture / Enrichment / Outreach
+        </Typography>
+      </Box>
 
       <Suspense fallback={
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+        <Stack alignItems="center" justifyContent="center" sx={{ height: 256 }}>
+          <CircularProgress />
+        </Stack>
       }>
         <CompanyDashboard />
       </Suspense>
-    </div>
+    </Box>
   )
 }

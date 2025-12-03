@@ -1,6 +1,12 @@
 'use client'
 
 import { useState, useEffect, FormEvent } from 'react'
+import TextField from '@mui/material/TextField'
+import Stack from '@mui/material/Stack'
+import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+import SearchIcon from '@mui/icons-material/Search'
+import ClearIcon from '@mui/icons-material/Clear'
 
 interface BookSearchProps {
   onSearch: (searchTerm: string) => void
@@ -31,23 +37,28 @@ export default function BookSearch({ onSearch, initialValue = '' }: BookSearchPr
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <input
+    <Stack component="form" onSubmit={handleSubmit} direction="row" spacing={2}>
+      <TextField
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search by title or author..."
-        className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        fullWidth
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+          endAdornment: searchTerm && (
+            <InputAdornment position="end">
+              <IconButton onClick={handleClear} edge="end" size="small">
+                <ClearIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
-      {searchTerm && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-        >
-          Clear
-        </button>
-      )}
-    </form>
+    </Stack>
   )
 }
