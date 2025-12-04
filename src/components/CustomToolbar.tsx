@@ -4,7 +4,6 @@ import {
   GridToolbarContainer,
 } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import CustomPagination from './CustomPagination';
 

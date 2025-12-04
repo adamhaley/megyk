@@ -28,6 +28,7 @@ export default function CompanyDashboard() {
     hasEmail: null,
     contactSent: null,
     hasAnalysis: null,
+    emailStatus: null,
   });
 
   const fetchCompanies = useCallback(async () => {
@@ -40,9 +41,9 @@ export default function CompanyDashboard() {
         page: paginationModel.page + 1, // API uses 1-based, DataGrid uses 0-based
         limit: paginationModel.pageSize,
         hasEmail: filters.hasEmail ?? undefined,
-        hasWebsite: filters.hasWebsite ?? undefined,
         contactSent: filters.contactSent ?? undefined,
         hasAnalysis: filters.hasAnalysis ?? undefined,
+        emailStatus: filters.emailStatus ?? undefined,
       });
 
       setCompanies(result.data);

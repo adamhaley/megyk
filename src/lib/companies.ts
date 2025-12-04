@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { GermanCompany, CompanyFilters } from '@/types/company';
 
 export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
-  const { search = '', page = 1, limit = 20, hasEmail, hasWebsite, contactSent, hasAnalysis } = filters;
+  const { search = '', page = 1, limit = 20, hasEmail, hasWebsite, contactSent, hasAnalysis, emailStatus } = filters;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -43,6 +43,11 @@ export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
     query = query.not('analysis', 'is', null).neq('analysis', '');
   } else if (hasAnalysis === false) {
     query = query.or('analysis.is.null,analysis.eq.');
+  }
+
+  // Email status filter
+  if (emailStatus) {
+    query = query.eq('email_status', emailStatus);
   }
 
   const { data, error, count } = await query;

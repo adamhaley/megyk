@@ -5,12 +5,17 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import EmailIcon from '@mui/icons-material/Email';
 
 export interface FilterState {
   hasEmail: boolean | null;
   contactSent: boolean | null;
   hasAnalysis: boolean | null;
+  emailStatus: string | null;
 }
 
 interface CompanyFiltersProps {
@@ -22,7 +27,14 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
     hasEmail: null,
     contactSent: null,
     hasAnalysis: null,
+    emailStatus: null,
   });
+
+  const emailStatusOptions = [
+    'ok:email_ok',
+    'risky:is_role',
+    'risky:accept_all',
+  ];
 
   const handleFilterToggle = (filterKey: keyof FilterState) => {
     const currentValue = filters[filterKey];
@@ -66,11 +78,18 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
 
   const activeFilterCount = Object.values(filters).filter(v => v !== null).length;
 
+  const handleEmailStatusChange = (value: string) => {
+    const newFilters = { ...filters, emailStatus: value || null };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
   const handleClearAll = () => {
     const clearedFilters: FilterState = {
       hasEmail: null,
       contactSent: null,
       hasAnalysis: null,
+      emailStatus: null,
     };
     setFilters(clearedFilters);
     onFilterChange(clearedFilters);
@@ -104,6 +123,55 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
           {...getChipProps(filters.hasAnalysis)}
           clickable
         />
+
+        <FormControl 
+          size="small" 
+          sx={{ 
+            minWidth: 160,
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'background.paper',
+              fontSize: '0.875rem',
+              '& .MuiSelect-select': {
+                py: 0.75,
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'text.primary',
+              }
+            }
+          }}
+        >
+          <InputLabel 
+            sx={{ 
+              color: 'text.secondary',
+              fontSize: '0.875rem',
+              '&.MuiInputLabel-shrink': {
+                fontSize: '0.75rem',
+              }
+            }}
+          >
+            Email Status
+          </InputLabel>
+          <Select
+            value={filters.emailStatus || ''}
+            onChange={(e) => handleEmailStatusChange(e.target.value)}
+            label="Email Status"
+            sx={{ 
+              color: 'text.primary',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'divider',
+              }
+            }}
+          >
+            <MenuItem value="" sx={{ fontSize: '0.875rem' }}>
+              <em>All</em>
+            </MenuItem>
+            {emailStatusOptions.map((status) => (
+              <MenuItem key={status} value={status} sx={{ fontSize: '0.875rem' }}>
+                {status}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {activeFilterCount > 0 && (
           <Chip
