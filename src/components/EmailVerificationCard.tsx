@@ -18,9 +18,10 @@ interface EmailVerificationCardProps {
   data: EmailStatusData[];
   lastRunTime?: Date | null;
   loading?: boolean;
+  workflowActive?: boolean;
 }
 
-export default function EmailVerificationCard({ data, lastRunTime, loading }: EmailVerificationCardProps) {
+export default function EmailVerificationCard({ data, lastRunTime, loading, workflowActive }: EmailVerificationCardProps) {
   if (loading) {
     return (
       <Card>
@@ -40,9 +41,32 @@ export default function EmailVerificationCard({ data, lastRunTime, loading }: Em
   return (
     <Card sx={{ height: '100%' }}>
       <CardContent sx={{ pb: 2 }}>
-        <Typography variant="h6" component="h3" sx={{ fontWeight: 600, mb: 1.5 }}>
-          Email Verification
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+          <Typography variant="h6" component="h3" sx={{ fontWeight: 600 }}>
+            Email Verification
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                bgcolor: workflowActive ? 'rgba(76, 175, 80, 1)' : 'rgba(255, 193, 7, 1)',
+                boxShadow: workflowActive 
+                  ? '0 0 8px rgba(76, 175, 80, 0.6)' 
+                  : '0 0 8px rgba(255, 193, 7, 0.6)',
+                animation: workflowActive ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.6 },
+                },
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+              {workflowActive ? 'Active' : 'Paused'}
+            </Typography>
+          </Box>
+        </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>

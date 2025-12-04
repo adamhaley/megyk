@@ -23,6 +23,8 @@ export default function CompanyDashboard() {
   const [totalCount, setTotalCount] = useState(0);
   const [emailStatusData, setEmailStatusData] = useState<EmailStatusCount[]>([]);
   const [emailStatusLoading, setEmailStatusLoading] = useState(true);
+  const [lastVerificationTime, setLastVerificationTime] = useState<Date | null>(null);
+  const [workflowActive, setWorkflowActive] = useState<boolean>(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 25,
@@ -72,7 +74,21 @@ export default function CompanyDashboard() {
       }
     };
 
+    const fetchLastVerification = async () => {
+      try {
+        const response = await fetch('/api/verification-last-run');
+        const { lastVerification, workflowActive: active } = await response.json();
+        if (lastVerification) {
+          setLastVerificationTime(new Date(lastVerification));
+        }
+        setWorkflowActive(active || false);
+      } catch (err) {
+        console.error('Failed to fetch last verification time:', err);
+      }
+    };
+
     fetchEmailStatus();
+    fetchLastVerification();
   }, []);
 
   const handleSearch = (searchTerm: string) => {
@@ -121,7 +137,8 @@ export default function CompanyDashboard() {
           <EmailVerificationCard 
             data={emailStatusData} 
             loading={emailStatusLoading}
-            lastRunTime={null}
+            lastRunTime={lastVerificationTime}
+            workflowActive={workflowActive}
           />
           {/* Add more detailed analytics cards here */}
         </Box>
