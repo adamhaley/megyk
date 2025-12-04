@@ -48,10 +48,10 @@ export default function CompanyTable({
             size="small"
             variant="outlined"
             sx={{ 
-              borderColor: contacted ? 'rgba(0, 0, 0, 0.23)' : 'divider',
-              color: 'text.secondary',
+              borderColor: contacted ? 'rgba(76, 175, 80, 0.4)' : 'divider',
+              color: contacted ? 'rgba(46, 125, 50, 0.9)' : 'text.secondary',
               fontWeight: 500,
-              bgcolor: contacted ? 'rgba(0, 0, 0, 0.04)' : 'transparent'
+              bgcolor: contacted ? 'rgba(76, 175, 80, 0.08)' : 'transparent'
             }}
           />
         );
@@ -74,13 +74,26 @@ export default function CompanyTable({
           }
           
           const lower = s.toLowerCase();
-          if (lower.includes('valid') && !lower.includes('invalid')) {
+          
+          // Green for ok:email_ok
+          if (lower === 'ok:email_ok' || lower === 'email_ok') {
             return {
-              borderColor: 'rgba(0, 0, 0, 0.23)',
-              color: 'text.secondary',
-              bgcolor: 'rgba(0, 0, 0, 0.04)'
+              borderColor: 'rgba(76, 175, 80, 0.4)',
+              color: 'rgba(46, 125, 50, 0.9)',
+              bgcolor: 'rgba(76, 175, 80, 0.08)'
             };
           }
+          
+          // Amber for risky statuses
+          if (lower.includes('risky:is_role') || lower.includes('risky:accept_all')) {
+            return {
+              borderColor: 'rgba(255, 152, 0, 0.4)',
+              color: 'rgba(230, 126, 0, 0.9)',
+              bgcolor: 'rgba(255, 152, 0, 0.08)'
+            };
+          }
+          
+          // Invalid or other risky
           if (lower.includes('invalid') || lower.includes('risky')) {
             return {
               borderColor: 'rgba(0, 0, 0, 0.15)',
@@ -88,6 +101,8 @@ export default function CompanyTable({
               bgcolor: 'transparent'
             };
           }
+          
+          // Default for other statuses
           return {
             borderColor: 'divider',
             color: 'text.secondary',
