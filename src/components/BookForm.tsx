@@ -215,18 +215,31 @@ export default function BookForm({
         >
           <Button
             type="button"
-            variant="outlined"
             onClick={onCancel}
             disabled={isLoading}
-            size="large"
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                bgcolor: 'action.hover',
+                color: 'text.primary',
+              },
+            }}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            variant="contained"
+            variant="outlined"
             disabled={isLoading}
-            size="large"
+            sx={{
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              '&:hover': {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                borderColor: 'primary.main',
+              },
+            }}
           >
             {isLoading ? 'Saving...' : 'Save'}
           </Button>

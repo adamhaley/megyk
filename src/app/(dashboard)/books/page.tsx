@@ -92,9 +92,17 @@ export default function BooksPage() {
         <Button
           component={Link}
           href="/books/new"
-          variant="contained"
-          size="large"
+          variant="outlined"
+          size="medium"
           startIcon={<AddIcon />}
+          sx={{
+            borderColor: 'divider',
+            color: 'text.primary',
+            '&:hover': {
+              borderColor: 'primary.main',
+              bgcolor: 'action.hover',
+            },
+          }}
         >
           Add New Book
         </Button>

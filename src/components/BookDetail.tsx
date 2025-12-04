@@ -5,6 +5,23 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Book } from '@/types/book'
 import { deleteBook } from '@/lib/books'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import MuiLink from '@mui/material/Link'
+import Divider from '@mui/material/Divider'
+import Tooltip from '@mui/material/Tooltip'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 
 interface BookDetailProps {
   book: Book
@@ -29,173 +46,280 @@ export default function BookDetail({ book }: BookDetailProps) {
     }
   }
 
+  const getStatusColor = (status: string): string => {
+    switch (status) {
+      case 'ingestion_complete':
+        return '#10b981'
+      case 'processing':
+        return '#f59e0b'
+      default:
+        return '#9ca3af'
+    }
+  }
+
+  const getStatusLabel = (status: string): string => {
+    switch (status) {
+      case 'ingestion_complete':
+        return 'Complete'
+      case 'processing':
+        return 'Processing'
+      case 'draft':
+        return 'Draft'
+      default:
+        return status
+    }
+  }
+
   return (
-    <div>
+    <Box>
       {/* Header with Actions */}
-      <div className="flex items-center justify-between mb-6">
-        <Link
+      <Stack 
+        direction="row" 
+        justifyContent="space-between" 
+        alignItems="center" 
+        sx={{ mb: 4 }}
+      >
+        <MuiLink
+          component={Link}
           href="/books"
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            textDecoration: 'none',
+            color: 'text.secondary',
+            '&:hover': { color: 'text.primary' },
+          }}
         >
-          ← Back to Books
-        </Link>
-        <div className="flex gap-3">
-          <Link
-            href={`/books/${book.id}/edit`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Edit
-          </Link>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
+          <ArrowBackIcon fontSize="small" />
+          Back to Books
+        </MuiLink>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit book">
+            <IconButton
+              component={Link}
+              href={`/books/${book.id}/edit`}
+              size="small"
+              sx={{
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'primary.main',
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <EditOutlinedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete book">
+            <IconButton
+              onClick={() => setShowDeleteModal(true)}
+              size="small"
+              sx={{
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'error.main',
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Stack>
 
       {/* Book Details Card */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-        <div className="space-y-6">
+      <Paper sx={{ p: 4 }}>
+        <Stack spacing={3}>
           {/* Title and Author */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
-            <p className="text-lg text-gray-600 mt-2">by {book.author}</p>
-          </div>
+          <Box>
+            <Typography variant="h3" component="h1" gutterBottom>
+              {book.title}
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              by {book.author}
+            </Typography>
+          </Box>
 
-          {/* Badges */}
-          <div className="flex items-center gap-3">
-            <span
-              className={`
-                px-3 py-1 rounded-full text-sm font-medium
-                ${
-                  book.status === 'ingestion_complete'
-                    ? 'bg-green-100 text-green-800'
-                    : book.status === 'processing'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-gray-100 text-gray-800'
-                }
-              `}
-            >
-              {book.status}
-            </span>
+          {/* Status Badges - Minimalist */}
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FiberManualRecordIcon 
+                sx={{ 
+                  fontSize: 8, 
+                  color: getStatusColor(book.status)
+                }} 
+              />
+              <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                {getStatusLabel(book.status)}
+              </Typography>
+            </Stack>
             {book.live && (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                Live
-              </span>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <FiberManualRecordIcon 
+                  sx={{ 
+                    fontSize: 8, 
+                    color: 'primary.main'
+                  }} 
+                />
+                <Typography variant="caption" color="primary.main" fontWeight={500}>
+                  Live
+                </Typography>
+              </Stack>
             )}
-          </div>
+          </Stack>
 
           {/* Summary */}
           {book.summary && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Summary</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{book.summary}</p>
-            </div>
+            <Box>
+              <Typography variant="h6" gutterBottom fontWeight={600}>
+                Summary
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                {book.summary}
+              </Typography>
+            </Box>
           )}
 
+          <Divider />
+
           {/* Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+              gap: 3,
+            }}
+          >
             {book.isbn && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">ISBN</dt>
-                <dd className="text-base text-gray-900 mt-1">{book.isbn}</dd>
-              </div>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  ISBN
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  {book.isbn}
+                </Typography>
+              </Box>
             )}
 
             {book.publication_year && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Publication Year</dt>
-                <dd className="text-base text-gray-900 mt-1">{book.publication_year}</dd>
-              </div>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Publication Year
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  {book.publication_year}
+                </Typography>
+              </Box>
             )}
 
             {book.page_count && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Page Count</dt>
-                <dd className="text-base text-gray-900 mt-1">{book.page_count} pages</dd>
-              </div>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Page Count
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  {book.page_count} pages
+                </Typography>
+              </Box>
             )}
 
             {book.cover_image_url && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Cover Image</dt>
-                <dd className="text-base text-gray-900 mt-1">
-                  <a
-                    href={book.cover_image_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    View Cover
-                  </a>
-                </dd>
-              </div>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Cover Image
+                </Typography>
+                <MuiLink
+                  href={book.cover_image_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ mt: 0.5, display: 'inline-block' }}
+                >
+                  View Cover
+                </MuiLink>
+              </Box>
             )}
 
             {book.default_summary_pdf_url && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Summary PDF</dt>
-                <dd className="text-base text-gray-900 mt-1">
-                  <a
-                    href={book.default_summary_pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    Download PDF
-                  </a>
-                </dd>
-              </div>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Summary PDF
+                </Typography>
+                <MuiLink
+                  href={book.default_summary_pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ mt: 0.5, display: 'inline-block' }}
+                >
+                  Download PDF
+                </MuiLink>
+              </Box>
             )}
 
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Created</dt>
-              <dd className="text-base text-gray-900 mt-1">
+            <Box>
+              <Typography variant="caption" color="text.secondary" display="block">
+                Created
+              </Typography>
+              <Typography variant="body1" sx={{ mt: 0.5 }}>
                 {new Date(book.created_at).toLocaleString()}
-              </dd>
-            </div>
+              </Typography>
+            </Box>
 
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-              <dd className="text-base text-gray-900 mt-1">
+            <Box>
+              <Typography variant="caption" color="text.secondary" display="block">
+                Last Updated
+              </Typography>
+              <Typography variant="body1" sx={{ mt: 0.5 }}>
                 {new Date(book.updated_at).toLocaleString()}
-              </dd>
-            </div>
-          </div>
-        </div>
-      </div>
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
+      </Paper>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Delete Book
-            </h2>
-            <p className="text-gray-700 mb-6">
-              Are you sure you want to delete &ldquo;{book.title}&rdquo;? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                disabled={deleting}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete Book</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete &ldquo;{book.title}&rdquo;? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setShowDeleteModal(false)}
+            disabled={deleting}
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                bgcolor: 'action.hover',
+                color: 'text.primary',
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            disabled={deleting}
+            sx={{
+              color: 'error.main',
+              '&:hover': {
+                bgcolor: 'error.main',
+                color: 'error.contrastText',
+              },
+            }}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 }

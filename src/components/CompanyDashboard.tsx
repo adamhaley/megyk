@@ -6,6 +6,12 @@ import { getCompanies } from '@/lib/companies';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 
 export default function CompanyDashboard() {
   const [companies, setCompanies] = useState<GermanCompany[]>([]);
@@ -65,31 +71,47 @@ const fetchCompanies = useCallback(async (resetData = false) => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <h3 className="text-red-800 font-semibold">Error loading companies</h3>
-        <p className="text-red-600">{error}</p>
-        <button
-          onClick={() => fetchCompanies(true)}
-          className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-        >
-          Retry
-        </button>
-      </div>
+      <Alert 
+        severity="error" 
+        action={
+          <Button 
+            color="inherit" 
+            size="small" 
+            onClick={() => fetchCompanies(true)}
+          >
+            Retry
+          </Button>
+        }
+      >
+        <strong>Error loading companies</strong>
+        <br />
+        {error}
+      </Alert>
     );
   }
 
   return (
-    <div className="space-y-6">
-      { <AnalyticsDashboard /> }
+    <Stack spacing={3}>
+      <AnalyticsDashboard />
       
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Companies</h2>
-            <p className="text-sm text-gray-500">{totalCount} total companies</p>
-          </div>
+      <Paper sx={{ p: 3 }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          spacing={2}
+          sx={{ mb: 3 }}
+        >
+          <Box>
+            <Typography variant="h6" component="h2">
+              Companies
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {totalCount.toLocaleString()} total companies
+            </Typography>
+          </Box>
           <SearchBar onSearch={handleSearch} />
-        </div>
+        </Stack>
         
         <CompanyTable 
           companies={companies} 
@@ -97,7 +119,7 @@ const fetchCompanies = useCallback(async (resetData = false) => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
         />
-      </div>
-    </div>
+      </Paper>
+    </Stack>
   );
 }
