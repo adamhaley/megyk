@@ -1,0 +1,31 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ master ]
+  # Removed pull_request trigger - only deploy on merge to master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: 🚀 Deploy to Server
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          script_stop: true  # Stop on first error
+          script: |
+            cd /root/megyk
+            bash .scripts/deploy.sh
+      
+      - name: ✅ Deployment Status
+        if: success()
+        run: echo "🎉 Deployment successful!"
+      
+      - name: ❌ Deployment Failed
+        if: failure()
+        run: echo "💥 Deployment failed - check logs"
