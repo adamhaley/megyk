@@ -1,6 +1,12 @@
 import { supabase } from './supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 
+export interface EmailStatusCount {
+  status: string;
+  count: number;
+  color: string;
+}
+
 export interface AnalyticsData {
   finderFelix: {
     totalPostalCodes: number;
@@ -227,4 +233,53 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     analysisAnna,
     pitchPaul
   };
+}
+
+/**
+ * Get email verification status distribution
+ * Only returns the 4 categories the client cares about
+ */
+export async function getEmailStatusDistribution(): Promise<EmailStatusCount[]> {
+  const { data, error } = await supabase
+    .from('german_companies')
+    .select('email_status');
+
+  if (error) {
+    throw new Error(`Failed to fetch email status distribution: ${error.message}`);
+  }
+
+  // Define the statuses we care about
+  const targetStatuses = ['ok:email_ok', 'risky:is_role', 'risky:accept_all'];
+  
+  // Count occurrences, grouping others as "unknown"
+  const statusCounts = (data || []).reduce((acc: Record<string, number>, row) => {
+    const status = row.email_status;
+    
+    if (targetStatuses.includes(status)) {
+      acc[status] = (acc[status] || 0) + 1;
+    } else {
+      acc['unknown'] = (acc['unknown'] || 0) + 1;
+    }
+    
+    return acc;
+  }, {});
+
+  // Convert to array and add colors
+  const getStatusColor = (status: string) => {
+    if (status === 'ok:email_ok') return 'rgba(76, 175, 80, 0.8)';
+    if (status === 'risky:is_role') return 'rgba(255, 152, 0, 0.8)';
+    if (status === 'risky:accept_all') return 'rgba(255, 152, 0, 0.8)';
+    return 'rgba(189, 189, 189, 0.6)'; // unknown
+  };
+
+  // Return in specific order: ok first, then risky ones, then unknown
+  const order = ['ok:email_ok', 'risky:is_role', 'risky:accept_all', 'unknown'];
+  
+  return order
+    .filter(status => statusCounts[status] > 0) // Only include if count > 0
+    .map(status => ({
+      status,
+      count: statusCounts[status],
+      color: getStatusColor(status)
+    }));
 }

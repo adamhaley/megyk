@@ -3,10 +3,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GermanCompany } from '@/types/company';
 import { getCompanies } from '@/lib/companies';
+import { getEmailStatusDistribution, EmailStatusCount } from '@/lib/analytics';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
 import CompanyFilters, { FilterState } from './CompanyFilters';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import EmailVerificationCard from './EmailVerificationCard';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -19,6 +21,8 @@ export default function CompanyDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [emailStatusData, setEmailStatusData] = useState<EmailStatusCount[]>([]);
+  const [emailStatusLoading, setEmailStatusLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 25,
@@ -55,6 +59,22 @@ export default function CompanyDashboard() {
     fetchCompanies();
   }, [fetchCompanies]);
 
+  useEffect(() => {
+    const fetchEmailStatus = async () => {
+      try {
+        setEmailStatusLoading(true);
+        const data = await getEmailStatusDistribution();
+        setEmailStatusData(data);
+      } catch (err) {
+        console.error('Failed to fetch email status distribution:', err);
+      } finally {
+        setEmailStatusLoading(false);
+      }
+    };
+
+    fetchEmailStatus();
+  }, []);
+
   const handleSearch = (searchTerm: string) => {
     setSearch(searchTerm);
     setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page on search
@@ -89,6 +109,23 @@ export default function CompanyDashboard() {
   return (
     <Stack spacing={3}>
       <AnalyticsDashboard />
+
+      <Box sx={{ mb: 4 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' },
+            gap: 3
+          }}
+        >
+          <EmailVerificationCard 
+            data={emailStatusData} 
+            loading={emailStatusLoading}
+            lastRunTime={null}
+          />
+          {/* Add more detailed analytics cards here */}
+        </Box>
+      </Box>
       
       <Paper sx={{ p: 3 }}>
         <Stack
