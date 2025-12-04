@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -36,6 +37,8 @@ const StatusIcon = ({ status }: { status: 'healthy' | 'warning' | 'error' }) => 
 };
 
 export default function EmailWarmupCard({ domains, loading, workflowActive, lastRunTime }: EmailWarmupCardProps) {
+  const [hoveredRecord, setHoveredRecord] = useState<{ domain: string; type: 'spf' | 'dmarc' | 'mx'; record: string } | null>(null);
+
   if (loading) {
     return (
       <Card>
@@ -79,7 +82,7 @@ export default function EmailWarmupCard({ domains, loading, workflowActive, last
           )}
         </Box>
 
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           {domains.map((domain) => (
             <Box key={domain.domain}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -89,10 +92,14 @@ export default function EmailWarmupCard({ domains, loading, workflowActive, last
                 </Typography>
               </Box>
               
-              <Stack spacing={0.75} sx={{ pl: 3 }}>
+              <Box sx={{ pl: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 {/* SPF */}
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+                <Box 
+                  onMouseEnter={() => domain.spf.record && setHoveredRecord({ domain: domain.domain, type: 'spf', record: domain.spf.record })}
+                  onMouseLeave={() => setHoveredRecord(null)}
+                  sx={{ cursor: 'help' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box
                       sx={{
                         width: 6,
@@ -105,26 +112,15 @@ export default function EmailWarmupCard({ domains, loading, workflowActive, last
                       SPF
                     </Typography>
                   </Box>
-                  {domain.spf.record && (
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        fontSize: '0.65rem', 
-                        color: 'text.disabled',
-                        fontFamily: 'monospace',
-                        pl: 2,
-                        display: 'block',
-                        opacity: 0.7
-                      }}
-                    >
-                      {domain.spf.record}
-                    </Typography>
-                  )}
                 </Box>
 
                 {/* DMARC */}
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+                <Box 
+                  onMouseEnter={() => domain.dmarc.record && setHoveredRecord({ domain: domain.domain, type: 'dmarc', record: domain.dmarc.record })}
+                  onMouseLeave={() => setHoveredRecord(null)}
+                  sx={{ cursor: 'help' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box
                       sx={{
                         width: 6,
@@ -137,21 +133,6 @@ export default function EmailWarmupCard({ domains, loading, workflowActive, last
                       DMARC
                     </Typography>
                   </Box>
-                  {domain.dmarc.record && (
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        fontSize: '0.65rem', 
-                        color: 'text.disabled',
-                        fontFamily: 'monospace',
-                        pl: 2,
-                        display: 'block',
-                        opacity: 0.7
-                      }}
-                    >
-                      {domain.dmarc.record}
-                    </Typography>
-                  )}
                 </Box>
 
                 {/* MX */}
@@ -165,13 +146,63 @@ export default function EmailWarmupCard({ domains, loading, workflowActive, last
                     }}
                   />
                   <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
-                    MX ({domain.mx.count} servers)
+                    MX ({domain.mx.count})
                   </Typography>
                 </Box>
-              </Stack>
+              </Box>
             </Box>
           ))}
         </Stack>
+
+        {/* Fixed DNS Record Display Area */}
+        <Box
+          sx={{
+            mt: 2,
+            p: 1.5,
+            bgcolor: 'rgba(0, 0, 0, 0.02)',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            minHeight: 60,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {hoveredRecord ? (
+            <Box sx={{ width: '100%' }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  fontSize: '0.65rem', 
+                  color: 'text.secondary',
+                  fontWeight: 600,
+                  display: 'block',
+                  mb: 0.5
+                }}
+              >
+                {hoveredRecord.domain} › {hoveredRecord.type.toUpperCase()}
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  fontSize: '0.65rem', 
+                  color: 'text.disabled',
+                  fontFamily: 'monospace',
+                  wordBreak: 'break-all',
+                  display: 'block',
+                  lineHeight: 1.4
+                }}
+              >
+                {hoveredRecord.record}
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.7rem', fontStyle: 'italic' }}>
+              Hover over SPF, DMARC, or MX to view DNS records
+            </Typography>
+          )}
+        </Box>
 
         {lastRunTime && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, fontSize: '0.7rem' }}>
