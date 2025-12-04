@@ -9,6 +9,7 @@ export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
   let query = supabase
     .from('german_companies')
     .select('*', { count: 'exact' })
+    .eq('is_duplicate', false)
     .order('updated_at', { ascending: false })
     .range(from, to);
 

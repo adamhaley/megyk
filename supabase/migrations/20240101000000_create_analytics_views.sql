@@ -3,6 +3,7 @@
 
 -- View: Company Statistics Summary
 -- Provides aggregated counts for website, email, and export statistics
+-- Excludes duplicate records (is_duplicate = false)
 CREATE OR REPLACE VIEW companies_stats AS
 SELECT 
   COUNT(*)::integer AS total_companies,
@@ -10,18 +11,19 @@ SELECT
   COUNT(*) FILTER (WHERE email IS NOT NULL AND email <> '')::integer AS companies_with_email,
   COUNT(*) FILTER (WHERE first_contact_sent = true)::integer AS exported_companies,
   ROUND(
-    COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::float / NULLIF(COUNT(*), 0) * 100,
+    (COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::numeric / NULLIF(COUNT(*), 0)) * 100,
     0
   )::integer AS website_percentage,
   ROUND(
-    COUNT(*) FILTER (WHERE email IS NOT NULL AND email <> '')::float / NULLIF(COUNT(*), 0) * 100,
+    (COUNT(*) FILTER (WHERE email IS NOT NULL AND email <> '')::numeric / NULLIF(COUNT(*), 0)) * 100,
     0
   )::integer AS email_percentage,
   ROUND(
-    COUNT(*) FILTER (WHERE first_contact_sent = true)::float / NULLIF(COUNT(*), 0) * 100,
+    (COUNT(*) FILTER (WHERE first_contact_sent = true)::numeric / NULLIF(COUNT(*), 0)) * 100,
     0
   )::integer AS export_percentage
-FROM german_companies;
+FROM german_companies
+WHERE is_duplicate = false;
 
 -- Function: Get Unique Postal Code Coverage Count
 -- Returns the count of distinct postal codes that have been scraped by Finder Felix
@@ -42,7 +44,7 @@ SELECT
   (SELECT COUNT(*)::integer FROM german_zip_codes) AS total_postal_codes,
   get_unique_postal_codes_count() AS covered_postal_codes,
   ROUND(
-    get_unique_postal_codes_count()::float / NULLIF((SELECT COUNT(*) FROM german_zip_codes), 0) * 100,
+    (get_unique_postal_codes_count()::numeric / NULLIF((SELECT COUNT(*) FROM german_zip_codes), 0)) * 100,
     0
   )::integer AS coverage_percentage;
 

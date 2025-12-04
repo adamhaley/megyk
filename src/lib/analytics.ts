@@ -116,12 +116,14 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     // Total companies
     supabase
       .from('german_companies')
-      .select('*', { count: 'exact', head: true }),
+      .select('*', { count: 'exact', head: true })
+      .eq('is_duplicate', false),
     
     // Companies with website (non-null and non-empty)
     supabase
       .from('german_companies')
       .select('*', { count: 'exact', head: true })
+      .eq('is_duplicate', false)
       .not('website', 'is', null)
       .neq('website', ''),
     
@@ -129,6 +131,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     supabase
       .from('german_companies')
       .select('*', { count: 'exact', head: true })
+      .eq('is_duplicate', false)
       .not('email', 'is', null)
       .neq('email', ''),
     
@@ -136,6 +139,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     supabase
       .from('german_companies')
       .select('*', { count: 'exact', head: true })
+      .eq('is_duplicate', false)
       .eq('first_contact_sent', true)
   ];
 
@@ -242,7 +246,8 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 export async function getEmailStatusDistribution(): Promise<EmailStatusCount[]> {
   const { data, error } = await supabase
     .from('german_companies')
-    .select('email_status');
+    .select('email_status')
+    .eq('is_duplicate', false);
 
   if (error) {
     throw new Error(`Failed to fetch email status distribution: ${error.message}`);
