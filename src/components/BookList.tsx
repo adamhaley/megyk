@@ -7,10 +7,15 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
+import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
+import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 
 interface BookListProps {
   books: Book[]
@@ -89,27 +94,27 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
     )
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): string => {
     switch (status) {
       case 'ingestion_complete':
-        return 'success'
+        return '#10b981' // green
       case 'processing':
-        return 'warning'
+        return '#f59e0b' // amber
       default:
-        return 'default'
+        return '#9ca3af' // gray
     }
   }
 
-  const getEnrichButtonProps = (state: 'idle' | 'loading' | 'success' | 'error') => {
-    switch (state) {
-      case 'loading':
-        return { color: 'inherit' as const, variant: 'contained' as const, disabled: true }
-      case 'success':
-        return { color: 'success' as const, variant: 'contained' as const }
-      case 'error':
-        return { color: 'error' as const, variant: 'contained' as const }
+  const getStatusLabel = (status: string): string => {
+    switch (status) {
+      case 'ingestion_complete':
+        return 'Complete'
+      case 'processing':
+        return 'Processing'
+      case 'draft':
+        return 'Draft'
       default:
-        return { color: 'secondary' as const, variant: 'contained' as const }
+        return status
     }
   }
 
@@ -178,39 +183,96 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
                 </Stack>
               </Box>
 
-              <Stack spacing={1} alignItems="flex-end" sx={{ minWidth: 'fit-content' }}>
-                {/* Status Badge */}
-                <Chip
-                  label={book.status}
-                  color={getStatusColor(book.status)}
-                  size="small"
-                />
-
-                {/* Live Badge */}
-                {book.live && (
-                  <Chip
-                    label="Live"
-                    color="primary"
-                    size="small"
+              <Stack spacing={1.5} alignItems="flex-end" sx={{ minWidth: 140 }}>
+                {/* Status Indicators - Minimalist */}
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <FiberManualRecordIcon 
+                    sx={{ 
+                      fontSize: 8, 
+                      color: getStatusColor(book.status)
+                    }} 
                   />
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {getStatusLabel(book.status)}
+                  </Typography>
+                </Stack>
+
+                {/* Live Indicator - Subtle */}
+                {book.live && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <FiberManualRecordIcon 
+                      sx={{ 
+                        fontSize: 8, 
+                        color: 'primary.main'
+                      }} 
+                    />
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: 'primary.main',
+                        fontSize: '0.75rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      Live
+                    </Typography>
+                  </Stack>
                 )}
 
-                {/* Enrich Book Button */}
-                <Button
-                  onClick={(e) => handleEnrichBook(book.id, e)}
-                  disabled={enrichingState[book.id] === 'loading'}
-                  size="small"
-                  {...getEnrichButtonProps(enrichingState[book.id] || 'idle')}
-                  sx={{ minWidth: 120 }}
+                {/* Enrich Button - Minimalist Icon */}
+                <Tooltip 
+                  title={
+                    enrichingState[book.id] === 'loading'
+                      ? 'Enriching...'
+                      : enrichingState[book.id] === 'success'
+                      ? 'Successfully enriched'
+                      : enrichingState[book.id] === 'error'
+                      ? 'Enrichment failed'
+                      : 'Enrich book metadata'
+                  }
+                  arrow
                 >
-                  {enrichingState[book.id] === 'loading'
-                    ? 'Enriching...'
-                    : enrichingState[book.id] === 'success'
-                    ? '✓ Enriched'
-                    : enrichingState[book.id] === 'error'
-                    ? '✗ Failed'
-                    : 'Enrich Book'}
-                </Button>
+                  <span>
+                    <IconButton
+                      onClick={(e) => handleEnrichBook(book.id, e)}
+                      disabled={enrichingState[book.id] === 'loading'}
+                      size="small"
+                      sx={{
+                        mt: 0.5,
+                        color: enrichingState[book.id] === 'success'
+                          ? 'success.main'
+                          : enrichingState[book.id] === 'error'
+                          ? 'error.main'
+                          : 'text.secondary',
+                        '&:hover': {
+                          color: enrichingState[book.id] === 'success'
+                            ? 'success.dark'
+                            : enrichingState[book.id] === 'error'
+                            ? 'error.dark'
+                            : 'primary.main',
+                          bgcolor: 'action.hover',
+                        },
+                      }}
+                    >
+                      {enrichingState[book.id] === 'loading' ? (
+                        <CircularProgress size={20} />
+                      ) : enrichingState[book.id] === 'success' ? (
+                        <CheckCircleOutlineIcon fontSize="small" />
+                      ) : enrichingState[book.id] === 'error' ? (
+                        <ErrorOutlineIcon fontSize="small" />
+                      ) : (
+                        <AutoFixHighIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
               </Stack>
             </Box>
           </CardContent>
