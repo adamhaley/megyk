@@ -66,7 +66,9 @@ async function getAnalyticsFromViews(): Promise<AnalyticsData | null> {
       pitchPaul: {
         totalCompanies: companyStats?.total_companies || 0,
         exportedCompanies: companyStats?.exported_companies || 0,
-        exportPercentage: companyStats?.export_percentage || 0
+        exportPercentage: (companyStats?.exported_companies || 0) > 0
+          ? Math.max(1, companyStats?.export_percentage || 0)
+          : 0
       }
     };
   } catch {
@@ -227,7 +229,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const pitchPaul = {
     totalCompanies: totalCompaniesCount,
     exportedCompanies: exportedCompaniesCount,
-    exportPercentage: totalCompaniesCount > 0
+    exportPercentage: totalCompaniesCount > 0 && exportedCompaniesCount > 0
       ? Math.max(1, Math.round((exportedCompaniesCount / totalCompaniesCount) * 100))
       : 0
   };

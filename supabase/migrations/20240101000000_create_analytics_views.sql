@@ -18,10 +18,14 @@ SELECT
     (COUNT(*) FILTER (WHERE email IS NOT NULL AND email <> '')::numeric / NULLIF(COUNT(*), 0)) * 100,
     0
   )::integer AS email_percentage,
-  ROUND(
-    (COUNT(*) FILTER (WHERE first_contact_sent = true)::numeric / NULLIF(COUNT(*), 0)) * 100,
-    0
-  )::integer AS export_percentage
+  CASE 
+    WHEN COUNT(*) FILTER (WHERE first_contact_sent = true) > 0 
+    THEN GREATEST(1, ROUND(
+      (COUNT(*) FILTER (WHERE first_contact_sent = true)::numeric / NULLIF(COUNT(*), 0)) * 100,
+      0
+    )::integer)
+    ELSE 0
+  END AS export_percentage
 FROM german_companies
 WHERE is_duplicate = false;
 
