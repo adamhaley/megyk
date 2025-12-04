@@ -1,14 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
-import Stack from '@mui/material/Stack';
-import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -23,14 +19,6 @@ interface EmailVerificationCardProps {
   lastRunTime?: Date | null;
   loading?: boolean;
 }
-
-const getStatusColor = (status: string) => {
-  if (status === 'ok:email_ok') return 'rgba(76, 175, 80, 0.8)';
-  if (status.startsWith('risky:')) return 'rgba(255, 152, 0, 0.8)';
-  if (status.startsWith('invalid:')) return 'rgba(158, 158, 158, 0.8)';
-  if (status.startsWith('unknown:')) return 'rgba(189, 189, 189, 0.6)';
-  return 'rgba(224, 224, 224, 0.8)';
-};
 
 export default function EmailVerificationCard({ data, lastRunTime, loading }: EmailVerificationCardProps) {
   if (loading) {
@@ -121,7 +109,7 @@ export default function EmailVerificationCard({ data, lastRunTime, loading }: Em
                   fontSize: 11,
                   padding: '6px 10px'
                 }}
-                formatter={(value: any) => [value.toLocaleString(), 'Count']}
+                formatter={(value: number | string) => [typeof value === 'number' ? value.toLocaleString() : value, 'Count']}
               />
               <Bar dataKey="count" radius={[0, 4, 4, 0]} minPointSize={3}>
                 {data.map((entry, index) => (
