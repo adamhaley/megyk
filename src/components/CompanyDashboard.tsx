@@ -10,6 +10,14 @@ import CompanyFilters, { FilterState } from './CompanyFilters';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import EmailVerificationCard from './EmailVerificationCard';
 import EmailWarmupCard from './EmailWarmupCard';
+
+interface DomainHealth {
+  domain: string;
+  spf: { exists: boolean; record?: string };
+  dmarc: { exists: boolean; record?: string };
+  mx: { exists: boolean; count: number };
+  status: 'healthy' | 'warning' | 'error';
+}
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -26,7 +34,7 @@ export default function CompanyDashboard() {
   const [emailStatusLoading, setEmailStatusLoading] = useState(true);
   const [lastVerificationTime, setLastVerificationTime] = useState<Date | null>(null);
   const [workflowActive, setWorkflowActive] = useState<boolean>(false);
-  const [emailHealth, setEmailHealth] = useState<any[]>([]);
+  const [emailHealth, setEmailHealth] = useState<DomainHealth[]>([]);
   const [emailHealthLoading, setEmailHealthLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
