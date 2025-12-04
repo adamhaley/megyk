@@ -9,6 +9,7 @@ import SearchBar from './SearchBar';
 import CompanyFilters, { FilterState } from './CompanyFilters';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import EmailVerificationCard from './EmailVerificationCard';
+import EmailWarmupCard from './EmailWarmupCard';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -25,6 +26,8 @@ export default function CompanyDashboard() {
   const [emailStatusLoading, setEmailStatusLoading] = useState(true);
   const [lastVerificationTime, setLastVerificationTime] = useState<Date | null>(null);
   const [workflowActive, setWorkflowActive] = useState<boolean>(false);
+  const [emailHealth, setEmailHealth] = useState<any[]>([]);
+  const [emailHealthLoading, setEmailHealthLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 25,
@@ -87,8 +90,22 @@ export default function CompanyDashboard() {
       }
     };
 
+    const fetchEmailHealth = async () => {
+      try {
+        setEmailHealthLoading(true);
+        const response = await fetch('/api/email-health');
+        const { domains } = await response.json();
+        setEmailHealth(domains || []);
+      } catch (err) {
+        console.error('Failed to fetch email health:', err);
+      } finally {
+        setEmailHealthLoading(false);
+      }
+    };
+
     fetchEmailStatus();
     fetchLastVerification();
+    fetchEmailHealth();
   }, []);
 
   const handleSearch = (searchTerm: string) => {
@@ -140,7 +157,13 @@ export default function CompanyDashboard() {
             lastRunTime={lastVerificationTime}
             workflowActive={workflowActive}
           />
-          {/* Add more detailed analytics cards here */}
+          
+          <EmailWarmupCard
+            domains={emailHealth}
+            loading={emailHealthLoading}
+            workflowActive={undefined}
+            lastRunTime={null}
+          />
         </Box>
       </Box>
       
