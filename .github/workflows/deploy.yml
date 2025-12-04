@@ -18,7 +18,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd /root/megyk
+            set -e
+            echo "Current directory: $(pwd)"
+            echo "Changing to megyk directory..."
+            cd ~/megyk || cd /root/megyk || cd /var/www/html/megyk
+            echo "Now in: $(pwd)"
+            echo "Listing .scripts folder:"
+            ls -la .scripts/
+            echo "Running deployment script..."
             bash .scripts/deploy.sh
       
       - name: ✅ Deployment Status
