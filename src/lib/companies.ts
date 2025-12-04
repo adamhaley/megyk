@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { GermanCompany, CompanyFilters } from '@/types/company';
 
 export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
-  const { search = '', page = 1, limit = 20, hasEmail, hasWebsite, contactSent, hasAnalysis, emailStatus } = filters;
+  const { search = '', page = 1, limit = 20, hasWebsite, contactSent, emailStatus } = filters;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -17,13 +17,6 @@ export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
     query = query.or(`company.ilike.%${search}%,email.ilike.%${search}%,website.ilike.%${search}%,city.ilike.%${search}%,state.ilike.%${search}%`);
   }
 
-  // Email filter
-  if (hasEmail === true) {
-    query = query.not('email', 'is', null).neq('email', '');
-  } else if (hasEmail === false) {
-    query = query.or('email.is.null,email.eq.');
-  }
-
   // Website filter
   if (hasWebsite === true) {
     query = query.not('website', 'is', null).neq('website', '');
@@ -36,13 +29,6 @@ export async function getCompanies(filters: Partial<CompanyFilters> = {}) {
     query = query.eq('first_contact_sent', true);
   } else if (contactSent === false) {
     query = query.eq('first_contact_sent', false);
-  }
-
-  // Analysis filter
-  if (hasAnalysis === true) {
-    query = query.not('analysis', 'is', null).neq('analysis', '');
-  } else if (hasAnalysis === false) {
-    query = query.or('analysis.is.null,analysis.eq.');
   }
 
   // Email status filter

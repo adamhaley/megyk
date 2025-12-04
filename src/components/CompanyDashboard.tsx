@@ -25,9 +25,7 @@ export default function CompanyDashboard() {
   });
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>({
-    hasEmail: null,
     contactSent: null,
-    hasAnalysis: null,
     emailStatus: null,
   });
 
@@ -40,9 +38,7 @@ export default function CompanyDashboard() {
         search,
         page: paginationModel.page + 1, // API uses 1-based, DataGrid uses 0-based
         limit: paginationModel.pageSize,
-        hasEmail: filters.hasEmail ?? undefined,
         contactSent: filters.contactSent ?? undefined,
-        hasAnalysis: filters.hasAnalysis ?? undefined,
         emailStatus: filters.emailStatus ?? undefined,
       });
 

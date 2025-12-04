@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { GermanCompany } from '@/types/company';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -10,6 +10,7 @@ import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import CustomPagination from './CustomPagination';
 import CustomToolbar from './CustomToolbar';
+import AnalysisDialog from './AnalysisDialog';
 
 interface CompanyTableProps {
   companies: GermanCompany[];
@@ -29,6 +30,19 @@ export default function CompanyTable({
   paginationModel,
   onPaginationModelChange 
 }: CompanyTableProps) {
+  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<{ name: string; analysis: string | null } | null>(null);
+
+  const handleAnalysisClick = (company: GermanCompany) => {
+    setSelectedCompany({ name: company.company, analysis: company.analysis });
+    setAnalysisDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setAnalysisDialogOpen(false);
+    setTimeout(() => setSelectedCompany(null), 200); // Clear after animation
+  };
+
   const columns: GridColDef[] = useMemo(() => [
     {
       field: 'company',
@@ -202,6 +216,7 @@ export default function CompanyTable({
       flex: 1.5,
       minWidth: 200,
       renderCell: (params: GridRenderCellParams) => {
+        const company = params.row as GermanCompany;
         if (!params.value) {
           return (
             <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
@@ -211,9 +226,34 @@ export default function CompanyTable({
         }
         const text = params.value as string;
         return (
-          <Typography variant="body2" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {text}
-          </Typography>
+          <Box
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAnalysisClick(company);
+            }}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                '& .analysis-text': {
+                  color: 'primary.main',
+                  textDecoration: 'underline',
+                }
+              }
+            }}
+          >
+            <Typography 
+              className="analysis-text"
+              variant="body2" 
+              noWrap 
+              sx={{ 
+                overflow: 'hidden', 
+                textOverflow: 'ellipsis',
+                transition: 'color 0.2s'
+              }}
+            >
+              {text}
+            </Typography>
+          </Box>
         );
       },
     },
@@ -250,40 +290,49 @@ export default function CompanyTable({
   }
 
   return (
-    <DataGrid
-      rows={companies}
-      columns={columns}
-      rowCount={totalCount}
-      loading={loading}
-      paginationMode="server"
-      paginationModel={paginationModel}
-      onPaginationModelChange={onPaginationModelChange}
-      pageSizeOptions={[10, 25, 50, 100]}
-      disableRowSelectionOnClick
-      autoHeight
-      slots={{
-        toolbar: CustomToolbar,
-        pagination: CustomPagination,
-      }}
-      slotProps={{
-        toolbar: {
-          showQuickFilter: false,
-        },
-      }}
-      sx={{
-        border: 'none',
-        '& .MuiDataGrid-cell:focus': {
-          outline: 'none',
-        },
-        '& .MuiDataGrid-row:hover': {
-          bgcolor: 'action.hover',
-        },
-        '& .MuiDataGrid-footerContainer': {
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          mt: 2,
-        },
-      }}
-    />
+    <>
+      <DataGrid
+        rows={companies}
+        columns={columns}
+        rowCount={totalCount}
+        loading={loading}
+        paginationMode="server"
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
+        pageSizeOptions={[10, 25, 50, 100]}
+        disableRowSelectionOnClick
+        autoHeight
+        slots={{
+          toolbar: CustomToolbar,
+          pagination: CustomPagination,
+        }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: false,
+          },
+        }}
+        sx={{
+          border: 'none',
+          '& .MuiDataGrid-cell:focus': {
+            outline: 'none',
+          },
+          '& .MuiDataGrid-row:hover': {
+            bgcolor: 'action.hover',
+          },
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            mt: 2,
+          },
+        }}
+      />
+      
+      <AnalysisDialog
+        open={analysisDialogOpen}
+        onClose={handleCloseDialog}
+        companyName={selectedCompany?.name || ''}
+        analysis={selectedCompany?.analysis || null}
+      />
+    </>
   );
 }

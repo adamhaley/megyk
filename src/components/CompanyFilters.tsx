@@ -9,12 +9,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import EmailIcon from '@mui/icons-material/Email';
 
 export interface FilterState {
-  hasEmail: boolean | null;
   contactSent: boolean | null;
-  hasAnalysis: boolean | null;
   emailStatus: string | null;
 }
 
@@ -24,9 +21,7 @@ interface CompanyFiltersProps {
 
 export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
-    hasEmail: null,
     contactSent: null,
-    hasAnalysis: null,
     emailStatus: null,
   });
 
@@ -86,9 +81,7 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
 
   const handleClearAll = () => {
     const clearedFilters: FilterState = {
-      hasEmail: null,
       contactSent: null,
-      hasAnalysis: null,
       emailStatus: null,
     };
     setFilters(clearedFilters);
@@ -103,24 +96,9 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
         </Typography>
 
         <Chip
-          label={filters.hasEmail === null ? 'Email' : filters.hasEmail ? 'Has Email' : 'No Email'}
-          icon={<EmailIcon sx={{ fontSize: '18px !important' }} />}
-          onClick={() => handleFilterToggle('hasEmail')}
-          {...getChipProps(filters.hasEmail)}
-          clickable
-        />
-
-        <Chip
           label={filters.contactSent === null ? 'Contact Status' : filters.contactSent ? 'Contacted' : 'Not Contacted'}
           onClick={() => handleFilterToggle('contactSent')}
           {...getChipProps(filters.contactSent)}
-          clickable
-        />
-
-        <Chip
-          label={filters.hasAnalysis === null ? 'Analysis' : filters.hasAnalysis ? 'Analyzed' : 'Not Analyzed'}
-          onClick={() => handleFilterToggle('hasAnalysis')}
-          {...getChipProps(filters.hasAnalysis)}
           clickable
         />
 
