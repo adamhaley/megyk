@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { GermanCompany } from '@/types/company';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
@@ -12,11 +11,21 @@ import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 interface CompanyTableProps {
   companies: GermanCompany[];
   loading: boolean;
-  hasMore: boolean;
-  onLoadMore: () => void;
+  totalCount: number;
+  paginationModel: {
+    page: number;
+    pageSize: number;
+  };
+  onPaginationModelChange: (model: { page: number; pageSize: number }) => void;
 }
 
-export default function CompanyTable({ companies, loading, hasMore, onLoadMore }: CompanyTableProps) {
+export default function CompanyTable({ 
+  companies, 
+  loading, 
+  totalCount,
+  paginationModel,
+  onPaginationModelChange 
+}: CompanyTableProps) {
   const columns: GridColDef[] = useMemo(() => [
     {
       field: 'company',
@@ -104,46 +113,31 @@ export default function CompanyTable({ companies, loading, hasMore, onLoadMore }
   }
 
   return (
-    <Box>
-      <Box sx={{ width: '100%' }}>
-        <DataGrid
-          rows={companies}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 25, page: 0 },
-            },
-            sorting: {
-              sortModel: [{ field: 'company', sort: 'asc' }],
-            },
-          }}
-          pageSizeOptions={[10, 25, 50, 100]}
-          disableRowSelectionOnClick
-          autoHeight
-          sx={{
-            border: 'none',
-            '& .MuiDataGrid-cell:focus': {
-              outline: 'none',
-            },
-            '& .MuiDataGrid-row:hover': {
-              bgcolor: 'action.hover',
-            },
-          }}
-        />
-      </Box>
-
-      {hasMore && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-          <Button
-            onClick={onLoadMore}
-            disabled={loading}
-            variant="contained"
-            size="large"
-          >
-            {loading ? 'Loading...' : 'Load More'}
-          </Button>
-        </Box>
-      )}
-    </Box>
+    <DataGrid
+      rows={companies}
+      columns={columns}
+      rowCount={totalCount}
+      loading={loading}
+      paginationMode="server"
+      paginationModel={paginationModel}
+      onPaginationModelChange={onPaginationModelChange}
+      pageSizeOptions={[10, 25, 50, 100]}
+      disableRowSelectionOnClick
+      autoHeight
+      sx={{
+        border: 'none',
+        '& .MuiDataGrid-cell:focus': {
+          outline: 'none',
+        },
+        '& .MuiDataGrid-row:hover': {
+          bgcolor: 'action.hover',
+        },
+        '& .MuiDataGrid-footerContainer': {
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          mt: 2,
+        },
+      }}
+    />
   );
 }

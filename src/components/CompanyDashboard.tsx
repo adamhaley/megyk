@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { GermanCompany, CompanyFilters } from '@/types/company';
+import { GermanCompany } from '@/types/company';
 import { getCompanies } from '@/lib/companies';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
@@ -18,55 +18,39 @@ export default function CompanyDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [filters, setFilters] = useState<CompanyFilters>({
-    search: '',
-    page: 1,
-    limit: 20
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 25,
   });
+  const [search, setSearch] = useState('');
 
-const fetchCompanies = useCallback(async (resetData = false) => {
-  setLoading(true);
-  setError(null);
-  
-  try {
-    const result = await getCompanies(filters);
-
-    if (resetData || filters.page === 1) {
-      setCompanies(result.data);
-    } else {
-      setCompanies(prev => {
-        const existingIds = new Set(prev.map(c => c.id));
-        return [...prev, ...result.data.filter(c => !existingIds.has(c.id))];
+  const fetchCompanies = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await getCompanies({
+        search,
+        page: paginationModel.page + 1, // API uses 1-based, DataGrid uses 0-based
+        limit: paginationModel.pageSize,
       });
+
+      setCompanies(result.data);
+      setTotalCount(result.count);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch companies');
+    } finally {
+      setLoading(false);
     }
-
-    setTotalCount(result.count);
-    setHasMore(result.hasMore);
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to fetch companies');
-  } finally {
-    setLoading(false);
-  }
-}, [filters]);
-
+  }, [paginationModel.page, paginationModel.pageSize, search]);
 
   useEffect(() => {
-    fetchCompanies(true);
-  }, [filters.search, fetchCompanies]);
+    fetchCompanies();
+  }, [fetchCompanies]);
 
-  useEffect(() => {
-    if (filters.page > 1) {
-      fetchCompanies(false);
-    }
-  }, [filters.page, fetchCompanies]);
-
-  const handleSearch = (search: string) => {
-    setFilters(prev => ({ ...prev, search, page: 1 }));
-  };
-
-  const handleLoadMore = () => {
-    setFilters(prev => ({ ...prev, page: prev.page + 1 }));
+  const handleSearch = (searchTerm: string) => {
+    setSearch(searchTerm);
+    setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page on search
   };
 
   if (error) {
@@ -77,7 +61,7 @@ const fetchCompanies = useCallback(async (resetData = false) => {
           <Button 
             color="inherit" 
             size="small" 
-            onClick={() => fetchCompanies(true)}
+            onClick={() => fetchCompanies()}
           >
             Retry
           </Button>
@@ -115,9 +99,10 @@ const fetchCompanies = useCallback(async (resetData = false) => {
         
         <CompanyTable 
           companies={companies} 
-          loading={loading} 
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
+          loading={loading}
+          totalCount={totalCount}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
         />
       </Paper>
     </Stack>

@@ -29,12 +29,27 @@ const renderCustomizedLabel = (entry: unknown, centerText?: { main: string; sub:
       y="50%"
       textAnchor="middle"
       dominantBaseline="central"
-      style={{ fill: '#111827', fontSize: '24px', fontWeight: 'bold' }}
     >
-      <tspan x="50%" dy="-0.5em" style={{ fontSize: '32px', fontWeight: 'bold' }}>
+      <tspan 
+        x="50%" 
+        dy="-0.5em" 
+        style={{ 
+          fontSize: '28px', 
+          fontWeight: 'bold',
+          fill: '#111827'
+        }}
+      >
         {centerText.main}
       </tspan>
-      <tspan x="50%" dy="1.5em" style={{ fontSize: '14px', fill: '#6b7280', fontWeight: 'normal' }}>
+      <tspan 
+        x="50%" 
+        dy="1.8em" 
+        style={{ 
+          fontSize: '11px', 
+          fill: '#6b7280', 
+          fontWeight: 'normal' 
+        }}
+      >
         {centerText.sub}
       </tspan>
     </text>
@@ -66,8 +81,8 @@ export default function AnalyticsChart({ title, subtitle, data, centerText }: An
                 data={data}
                 cx="50%"
                 cy="53%"
-                innerRadius={centerText ? 60 : 0}
-                outerRadius={80}
+                innerRadius={centerText ? 70 : 0}
+                outerRadius={85}
                 paddingAngle={2}
                 dataKey="value"
               >
