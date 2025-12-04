@@ -36,7 +36,6 @@ export default function SupabaseProvider({
 
     // Global error handler for auth errors
     if (typeof window !== 'undefined') {
-      const originalError = console.error
       window.addEventListener('unhandledrejection', async (event) => {
         const error = event.reason
         if (
