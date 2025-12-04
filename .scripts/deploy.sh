@@ -14,23 +14,24 @@ yarn install --frozen-lockfile
 echo "🔨 Building application..."
 yarn build
 
-# Restart the application (adjust this based on your process manager)
+# Restart the application
 echo "♻️  Restarting application..."
 
-# Option 1: If using PM2
-if command -v pm2 &> /dev/null; then
-  pm2 restart megyk || pm2 start yarn --name megyk -- start
-  echo "✅ PM2 restart complete"
-
-# Option 2: If using systemd
+# Check if megyk-dashboard service exists
+if systemctl is-active --quiet megyk-dashboard; then
+  sudo systemctl restart megyk-dashboard
+  echo "✅ Systemd restart complete (megyk-dashboard)"
+  systemctl status megyk-dashboard --no-pager
 elif systemctl is-active --quiet megyk; then
   sudo systemctl restart megyk
-  echo "✅ Systemd restart complete"
-
-# Option 3: If no process manager (manual)
+  echo "✅ Systemd restart complete (megyk)"
+  systemctl status megyk --no-pager
+elif command -v pm2 &> /dev/null && pm2 list | grep -q megyk; then
+  pm2 restart megyk
+  echo "✅ PM2 restart complete"
 else
-  echo "⚠️  No process manager detected"
-  echo "⚠️  Please restart the app manually with: yarn start"
+  echo "⚠️  No service found - manual restart needed"
+  echo "⚠️  Run: sudo systemctl restart megyk-dashboard"
 fi
 
 echo "🎉 Deployment complete!"
