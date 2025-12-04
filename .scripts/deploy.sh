@@ -4,9 +4,7 @@ set -u  # Exit on undefined variable
 
 echo "🚀 Starting deployment..."
 
-# Pull latest code
-echo "📥 Pulling latest code from master..."
-git pull origin master
+# Note: git pull is done in the GitHub Action workflow before this script runs
 
 # Install dependencies
 echo "📦 Installing dependencies..."

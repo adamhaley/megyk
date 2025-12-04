@@ -19,13 +19,17 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             set -e
-            echo "Current directory: $(pwd)"
-            echo "Changing to megyk directory..."
+            echo "📂 Navigating to project directory..."
             cd ~/megyk || cd /root/megyk || cd /var/www/html/megyk
-            echo "Now in: $(pwd)"
-            echo "Listing .scripts folder:"
-            ls -la .scripts/
-            echo "Running deployment script..."
+            echo "✓ Now in: $(pwd)"
+            
+            echo "📥 Pulling latest code..."
+            git pull origin master
+            
+            echo "🔍 Verifying deploy script exists..."
+            ls -la .scripts/deploy.sh
+            
+            echo "🚀 Running deployment..."
             bash .scripts/deploy.sh
       
       - name: ✅ Deployment Status
