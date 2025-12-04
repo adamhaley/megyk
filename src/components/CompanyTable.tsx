@@ -8,6 +8,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import CustomPagination from './CustomPagination';
+import CustomToolbar from './CustomToolbar';
 
 interface CompanyTableProps {
   companies: GermanCompany[];
@@ -244,6 +246,15 @@ export default function CompanyTable({
       pageSizeOptions={[10, 25, 50, 100]}
       disableRowSelectionOnClick
       autoHeight
+      slots={{
+        toolbar: CustomToolbar,
+        pagination: CustomPagination,
+      }}
+      slotProps={{
+        toolbar: {
+          showQuickFilter: false,
+        },
+      }}
       sx={{
         border: 'none',
         '& .MuiDataGrid-cell:focus': {

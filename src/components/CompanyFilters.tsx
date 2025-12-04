@@ -25,23 +25,21 @@ export default function CompanyFilters({ onFilterChange }: CompanyFiltersProps) 
   });
 
   const handleFilterToggle = (filterKey: keyof FilterState) => {
-    setFilters(prev => {
-      const currentValue = prev[filterKey];
-      let newValue: boolean | null;
-      
-      // Cycle through: null -> true -> false -> null
-      if (currentValue === null) {
-        newValue = true;
-      } else if (currentValue === true) {
-        newValue = false;
-      } else {
-        newValue = null;
-      }
+    const currentValue = filters[filterKey];
+    let newValue: boolean | null;
+    
+    // Cycle through: null -> true -> false -> null
+    if (currentValue === null) {
+      newValue = true;
+    } else if (currentValue === true) {
+      newValue = false;
+    } else {
+      newValue = null;
+    }
 
-      const newFilters = { ...prev, [filterKey]: newValue };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const newFilters = { ...filters, [filterKey]: newValue };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const getChipProps = (value: boolean | null) => {
