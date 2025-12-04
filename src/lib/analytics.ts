@@ -126,11 +126,11 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       .not('email', 'is', null)
       .neq('email', ''),
     
-    // Companies exported to instantly.ai
+    // Companies with first contact sent
     supabase
       .from('german_companies')
       .select('*', { count: 'exact', head: true })
-      .eq('exported_to_instantly', true)
+      .eq('first_contact_sent', true)
   ];
 
   // Only fetch postal codes if RPC function didn't work

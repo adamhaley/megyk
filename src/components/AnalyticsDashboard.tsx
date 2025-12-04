@@ -98,12 +98,12 @@ export default function AnalyticsDashboard() {
 
   const pitchPaulData = [
     {
-      name: 'Exported to Instantly',
+      name: 'First Contact Sent',
       value: analyticsData.pitchPaul.exportPercentage,
       color: '#F59E0B'
     },
     {
-      name: 'Not Exported',
+      name: 'Not Contacted',
       value: 100 - analyticsData.pitchPaul.exportPercentage,
       color: '#F3F4F6'
     }
@@ -143,7 +143,7 @@ export default function AnalyticsDashboard() {
             data={pitchPaulData}
             centerText={{
               main: `${analyticsData.pitchPaul.exportPercentage}%`,
-              sub: `${analyticsData.pitchPaul.exportedCompanies.toLocaleString()} exported`
+              sub: `${analyticsData.pitchPaul.exportedCompanies.toLocaleString()} contacted`
             }}
           />
         </Box>

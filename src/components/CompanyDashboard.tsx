@@ -5,6 +5,7 @@ import { GermanCompany } from '@/types/company';
 import { getCompanies } from '@/lib/companies';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
+import CompanyFilters, { FilterState } from './CompanyFilters';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -23,6 +24,11 @@ export default function CompanyDashboard() {
     pageSize: 25,
   });
   const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<FilterState>({
+    hasEmail: null,
+    contactSent: null,
+    hasAnalysis: null,
+  });
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
@@ -33,6 +39,10 @@ export default function CompanyDashboard() {
         search,
         page: paginationModel.page + 1, // API uses 1-based, DataGrid uses 0-based
         limit: paginationModel.pageSize,
+        hasEmail: filters.hasEmail ?? undefined,
+        hasWebsite: filters.hasWebsite ?? undefined,
+        contactSent: filters.contactSent ?? undefined,
+        hasAnalysis: filters.hasAnalysis ?? undefined,
       });
 
       setCompanies(result.data);
@@ -42,7 +52,7 @@ export default function CompanyDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [paginationModel.page, paginationModel.pageSize, search]);
+  }, [paginationModel.page, paginationModel.pageSize, search, filters]);
 
   useEffect(() => {
     fetchCompanies();
@@ -51,6 +61,11 @@ export default function CompanyDashboard() {
   const handleSearch = (searchTerm: string) => {
     setSearch(searchTerm);
     setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page on search
+  };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page on filter change
   };
 
   if (error) {
@@ -96,6 +111,8 @@ export default function CompanyDashboard() {
           </Box>
           <SearchBar onSearch={handleSearch} />
         </Stack>
+
+        <CompanyFilters onFilterChange={handleFilterChange} />
         
         <CompanyTable 
           companies={companies} 

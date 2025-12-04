@@ -66,3 +66,4 @@ SELECT get_unique_postal_codes_count();
 The migrations include `GRANT` statements to allow anonymous access. Adjust these based on your Row Level Security (RLS) policies if you have authentication enabled.
 
 
+

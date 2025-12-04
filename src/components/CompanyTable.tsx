@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 
 interface CompanyTableProps {
@@ -34,12 +35,90 @@ export default function CompanyTable({
       minWidth: 200,
     },
     {
+      field: 'first_contact_sent',
+      headerName: 'Contact Status',
+      width: 140,
+      renderCell: (params: GridRenderCellParams) => {
+        const contacted = params.value as boolean;
+        return (
+          <Chip
+            label={contacted ? 'Contacted' : 'Not Contacted'}
+            size="small"
+            variant="outlined"
+            sx={{ 
+              borderColor: contacted ? 'rgba(0, 0, 0, 0.23)' : 'divider',
+              color: 'text.secondary',
+              fontWeight: 500,
+              bgcolor: contacted ? 'rgba(0, 0, 0, 0.04)' : 'transparent'
+            }}
+          />
+        );
+      },
+    },
+    {
+      field: 'email_status',
+      headerName: 'Email Status',
+      width: 130,
+      renderCell: (params: GridRenderCellParams) => {
+        const status = params.value as string | null;
+        
+        const getStatusStyle = (s: string | null) => {
+          if (!s) {
+            return {
+              borderColor: 'divider',
+              color: 'text.disabled',
+              bgcolor: 'transparent'
+            };
+          }
+          
+          const lower = s.toLowerCase();
+          if (lower.includes('valid') && !lower.includes('invalid')) {
+            return {
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+              color: 'text.secondary',
+              bgcolor: 'rgba(0, 0, 0, 0.04)'
+            };
+          }
+          if (lower.includes('invalid') || lower.includes('risky')) {
+            return {
+              borderColor: 'rgba(0, 0, 0, 0.15)',
+              color: 'text.disabled',
+              bgcolor: 'transparent'
+            };
+          }
+          return {
+            borderColor: 'divider',
+            color: 'text.secondary',
+            bgcolor: 'transparent'
+          };
+        };
+
+        return (
+          <Chip
+            label={status || 'Unknown'}
+            size="small"
+            variant="outlined"
+            sx={{ 
+              fontWeight: 500,
+              ...getStatusStyle(status)
+            }}
+          />
+        );
+      },
+    },
+    {
       field: 'email',
       headerName: 'Email',
       flex: 1,
-      minWidth: 200,
+      minWidth: 180,
       renderCell: (params: GridRenderCellParams) => {
-        if (!params.value) return null;
+        if (!params.value) {
+          return (
+            <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+              No email
+            </Typography>
+          );
+        }
         return (
           <Link
             href={`mailto:${params.value}`}
@@ -52,12 +131,38 @@ export default function CompanyTable({
       },
     },
     {
+      field: 'address',
+      headerName: 'Address',
+      flex: 1,
+      minWidth: 220,
+      renderCell: (params: GridRenderCellParams) => {
+        if (!params.value) {
+          return (
+            <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+              No address
+            </Typography>
+          );
+        }
+        return (
+          <Typography variant="body2" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {params.value as string}
+          </Typography>
+        );
+      },
+    },
+    {
       field: 'website',
       headerName: 'Website',
       flex: 1,
-      minWidth: 200,
+      minWidth: 180,
       renderCell: (params: GridRenderCellParams) => {
-        if (!params.value) return null;
+        if (!params.value) {
+          return (
+            <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+              No website
+            </Typography>
+          );
+        }
         const url = (params.value as string).startsWith('http')
           ? params.value as string
           : `https://${params.value}`;
@@ -78,17 +183,32 @@ export default function CompanyTable({
       field: 'analysis',
       headerName: 'Analysis',
       flex: 1.5,
-      minWidth: 250,
+      minWidth: 200,
+      renderCell: (params: GridRenderCellParams) => {
+        if (!params.value) {
+          return (
+            <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+              Not analyzed
+            </Typography>
+          );
+        }
+        const text = params.value as string;
+        return (
+          <Typography variant="body2" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {text}
+          </Typography>
+        );
+      },
     },
     {
-      field: 'created_at',
+      field: 'updated_at',
       headerName: 'Last Updated',
-      width: 140,
+      width: 120,
       valueFormatter: (value) => {
         return new Date(value as string).toLocaleDateString('en-US', {
-          year: 'numeric',
           month: 'short',
           day: 'numeric',
+          year: '2-digit',
         });
       },
     },

@@ -8,7 +8,7 @@ SELECT
   COUNT(*)::integer AS total_companies,
   COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::integer AS companies_with_website,
   COUNT(*) FILTER (WHERE email IS NOT NULL AND email <> '')::integer AS companies_with_email,
-  COUNT(*) FILTER (WHERE exported_to_instantly = true)::integer AS exported_companies,
+  COUNT(*) FILTER (WHERE first_contact_sent = true)::integer AS exported_companies,
   ROUND(
     COUNT(*) FILTER (WHERE website IS NOT NULL AND website <> '')::float / NULLIF(COUNT(*), 0) * 100,
     0
@@ -18,7 +18,7 @@ SELECT
     0
   )::integer AS email_percentage,
   ROUND(
-    COUNT(*) FILTER (WHERE exported_to_instantly = true)::float / NULLIF(COUNT(*), 0) * 100,
+    COUNT(*) FILTER (WHERE first_contact_sent = true)::float / NULLIF(COUNT(*), 0) * 100,
     0
   )::integer AS export_percentage
 FROM german_companies;
@@ -51,5 +51,6 @@ SELECT
 GRANT SELECT ON companies_stats TO anon;
 GRANT SELECT ON finder_felix_coverage TO anon;
 GRANT EXECUTE ON FUNCTION get_unique_postal_codes_count() TO anon;
+
 
 
