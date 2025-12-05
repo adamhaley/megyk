@@ -11,6 +11,7 @@ import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import Link from '@mui/material/Link'
 
 export default function ResetPassword() {
   const { supabase } = useSupabase()
