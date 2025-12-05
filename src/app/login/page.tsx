@@ -149,7 +149,8 @@ export default function Login() {
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
 
-              <Box sx={{ textAlign: 'center' }}>
+              {/* Forgot password link temporarily disabled until email templates are configured */}
+              {/* <Box sx={{ textAlign: 'center' }}>
                 <Link
                   component="button"
                   type="button"
@@ -167,7 +168,7 @@ export default function Login() {
                 >
                   Forgot password?
                 </Link>
-              </Box>
+              </Box> */}
             </Stack>
           </form>
         </CardContent>
