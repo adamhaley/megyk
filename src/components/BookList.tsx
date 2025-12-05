@@ -108,7 +108,7 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
   const getStatusLabel = (status: string): string => {
     switch (status) {
       case 'ingestion_complete':
-        return 'Complete'
+        return 'Ingestion complete'
       case 'processing':
         return 'Processing'
       case 'draft':
@@ -222,6 +222,28 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
                       }}
                     >
                       Live
+                    </Typography>
+                  </Stack>
+                )}
+
+                {/* Summaries Indicator - Green when 9 summaries exist */}
+                {book.summary_count !== undefined && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <FiberManualRecordIcon 
+                      sx={{ 
+                        fontSize: 8, 
+                        color: book.summary_count === 9 ? '#10b981' : '#9ca3af'
+                      }} 
+                    />
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: book.summary_count === 9 ? '#10b981' : 'text.secondary',
+                        fontSize: '0.75rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      Summaries
                     </Typography>
                   </Stack>
                 )}

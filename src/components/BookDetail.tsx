@@ -60,7 +60,7 @@ export default function BookDetail({ book }: BookDetailProps) {
   const getStatusLabel = (status: string): string => {
     switch (status) {
       case 'ingestion_complete':
-        return 'Complete'
+        return 'Ingestion complete'
       case 'processing':
         return 'Processing'
       case 'draft':

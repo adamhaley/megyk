@@ -13,6 +13,7 @@ export interface Book {
   page_count: number | null
   default_summary_pdf_url: string | null
   live: boolean
+  summary_count?: number
 }
 
 export interface BookFilters {
