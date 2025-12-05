@@ -11,6 +11,11 @@ import Button from '@mui/material/Button'
 import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Link from '@mui/material/Link'
 
 export default function Login() {
   const { supabase } = useSupabase()
@@ -19,6 +24,11 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState(false)
+  const [resetError, setResetError] = useState<string | null>(null)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,6 +51,35 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetLoading(true)
+    setResetError(null)
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+
+      if (error) {
+        setResetError(error.message)
+      } else {
+        setResetSuccess(true)
+      }
+    } catch {
+      setResetError('Failed to send reset email')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const handleCloseResetDialog = () => {
+    setResetDialogOpen(false)
+    setResetEmail('')
+    setResetSuccess(false)
+    setResetError(null)
   }
 
   return (
@@ -109,10 +148,82 @@ export default function Login() {
               >
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
+
+              <Box sx={{ textAlign: 'center' }}>
+                <Link
+                  component="button"
+                  type="button"
+                  onClick={() => setResetDialogOpen(true)}
+                  sx={{
+                    fontSize: '0.875rem',
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Forgot password?
+                </Link>
+              </Box>
             </Stack>
           </form>
         </CardContent>
       </Card>
+
+      {/* Password Reset Dialog */}
+      <Dialog 
+        open={resetDialogOpen} 
+        onClose={handleCloseResetDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Reset Password</DialogTitle>
+        <form onSubmit={handlePasswordReset}>
+          <DialogContent>
+            {resetSuccess ? (
+              <Alert severity="success">
+                Password reset email sent! Check your inbox for the reset link.
+              </Alert>
+            ) : (
+              <>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Enter your email address and we'll send you a link to reset your password.
+                </Typography>
+                
+                <TextField
+                  label="Email address"
+                  type="email"
+                  fullWidth
+                  required
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  disabled={resetLoading}
+                  autoFocus
+                />
+
+                {resetError && (
+                  <Alert severity="error" sx={{ mt: 2 }}>
+                    {resetError}
+                  </Alert>
+                )}
+              </>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3 }}>
+            <Button onClick={handleCloseResetDialog} disabled={resetLoading}>
+              {resetSuccess ? 'Close' : 'Cancel'}
+            </Button>
+            {!resetSuccess && (
+              <Button type="submit" variant="contained" disabled={resetLoading}>
+                {resetLoading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
+            )}
+          </DialogActions>
+        </form>
+      </Dialog>
     </Box>
   )
 }

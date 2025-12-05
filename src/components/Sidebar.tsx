@@ -60,9 +60,25 @@ export default function Sidebar({ userEmail }: SidebarProps) {
             borderColor: 'divider',
           }}
         >
-          <Typography variant="h5" component="h2" fontWeight="bold">
-            Megyk
-          </Typography>
+          <Link 
+            href="/"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <Typography 
+              variant="h5" 
+              component="h2" 
+              fontWeight="bold"
+              sx={{ 
+                cursor: 'pointer',
+                transition: 'opacity 0.2s',
+                '&:hover': {
+                  opacity: 0.7
+                }
+              }}
+            >
+              Megyk
+            </Typography>
+          </Link>
         </Box>
 
         {/* Navigation Links */}
