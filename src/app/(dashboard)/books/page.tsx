@@ -64,9 +64,12 @@ export default function BooksPage() {
 
   const handleBookEnriched = (enrichedBook: Book) => {
     // Update the specific book in the list with enriched data
+    // Preserve summary_count from the existing book since enriched data doesn't include it
     setBooks((prevBooks) =>
       prevBooks.map((book) =>
-        book.id === enrichedBook.id ? enrichedBook : book
+        book.id === enrichedBook.id
+          ? { ...enrichedBook, summary_count: book.summary_count }
+          : book
       )
     )
   }

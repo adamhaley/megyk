@@ -32,6 +32,17 @@ interface EnrichingState {
 export default function BookList({ books, loading, hasMore, onLoadMore, onBookEnriched }: BookListProps) {
   const [enrichingState, setEnrichingState] = useState<EnrichingState>({})
 
+  // Check if book is missing any metadata fields that can be enriched
+  const isBookMissingMetadata = (book: Book): boolean => {
+    return (
+      !book.author ||
+      !book.summary ||
+      !book.isbn ||
+      !book.page_count ||
+      !book.publication_year
+    )
+  }
+
   const handleEnrichBook = async (bookId: string, e: React.MouseEvent) => {
     // Prevent navigation when clicking the button
     e.preventDefault()
@@ -98,7 +109,7 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
     switch (status) {
       case 'ingestion_complete':
         return '#10b981' // green
-      case 'processing':
+      case 'pending_ingest':
         return '#f59e0b' // amber
       default:
         return '#9ca3af' // gray
@@ -109,10 +120,8 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
     switch (status) {
       case 'ingestion_complete':
         return 'Ingestion complete'
-      case 'processing':
-        return 'Processing'
-      case 'draft':
-        return 'Draft'
+      case 'pending_ingest':
+        return 'Pending ingest'
       default:
         return status
     }
@@ -195,7 +204,7 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
                   <Typography 
                     variant="caption" 
                     sx={{ 
-                      color: 'text.secondary',
+                      color: book.status === 'ingestion_complete' ? '#10b981' : 'text.secondary',
                       fontSize: '0.75rem',
                       fontWeight: 500
                     }}
@@ -248,53 +257,55 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
                   </Stack>
                 )}
 
-                {/* Enrich Button - Minimalist Icon */}
-                <Tooltip 
-                  title={
-                    enrichingState[book.id] === 'loading'
-                      ? 'Enriching...'
-                      : enrichingState[book.id] === 'success'
-                      ? 'Successfully enriched'
-                      : enrichingState[book.id] === 'error'
-                      ? 'Enrichment failed'
-                      : 'Enrich book metadata'
-                  }
-                  arrow
-                >
-                  <span>
-                    <IconButton
-                      onClick={(e) => handleEnrichBook(book.id, e)}
-                      disabled={enrichingState[book.id] === 'loading'}
-                      size="small"
-                      sx={{
-                        mt: 0.5,
-                        color: enrichingState[book.id] === 'success'
-                          ? 'success.main'
-                          : enrichingState[book.id] === 'error'
-                          ? 'error.main'
-                          : 'text.secondary',
-                        '&:hover': {
+                {/* Enrich Button - Minimalist Icon - Only show if metadata is missing */}
+                {isBookMissingMetadata(book) && (
+                  <Tooltip 
+                    title={
+                      enrichingState[book.id] === 'loading'
+                        ? 'Enriching...'
+                        : enrichingState[book.id] === 'success'
+                        ? 'Successfully enriched'
+                        : enrichingState[book.id] === 'error'
+                        ? 'Enrichment failed'
+                        : 'Enrich book metadata'
+                    }
+                    arrow
+                  >
+                    <span>
+                      <IconButton
+                        onClick={(e) => handleEnrichBook(book.id, e)}
+                        disabled={enrichingState[book.id] === 'loading'}
+                        size="small"
+                        sx={{
+                          mt: 0.5,
                           color: enrichingState[book.id] === 'success'
-                            ? 'success.dark'
+                            ? 'success.main'
                             : enrichingState[book.id] === 'error'
-                            ? 'error.dark'
-                            : 'primary.main',
-                          bgcolor: 'action.hover',
-                        },
-                      }}
-                    >
-                      {enrichingState[book.id] === 'loading' ? (
-                        <CircularProgress size={20} />
-                      ) : enrichingState[book.id] === 'success' ? (
-                        <CheckCircleOutlineIcon fontSize="small" />
-                      ) : enrichingState[book.id] === 'error' ? (
-                        <ErrorOutlineIcon fontSize="small" />
-                      ) : (
-                        <AutoFixHighIcon fontSize="small" />
-                      )}
-                    </IconButton>
-                  </span>
-                </Tooltip>
+                            ? 'error.main'
+                            : 'text.secondary',
+                          '&:hover': {
+                            color: enrichingState[book.id] === 'success'
+                              ? 'success.dark'
+                              : enrichingState[book.id] === 'error'
+                              ? 'error.dark'
+                              : 'primary.main',
+                            bgcolor: 'action.hover',
+                          },
+                        }}
+                      >
+                        {enrichingState[book.id] === 'loading' ? (
+                          <CircularProgress size={20} />
+                        ) : enrichingState[book.id] === 'success' ? (
+                          <CheckCircleOutlineIcon fontSize="small" />
+                        ) : enrichingState[book.id] === 'error' ? (
+                          <ErrorOutlineIcon fontSize="small" />
+                        ) : (
+                          <AutoFixHighIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
               </Stack>
             </Box>
           </CardContent>

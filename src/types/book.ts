@@ -14,6 +14,7 @@ export interface Book {
   default_summary_pdf_url: string | null
   live: boolean
   summary_count?: number
+  completed_summary_count?: number
 }
 
 export interface BookFilters {

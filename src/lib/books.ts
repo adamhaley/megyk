@@ -76,7 +76,22 @@ export async function getBookById(id: string) {
     throw new Error(`Failed to fetch book: ${error.message}`)
   }
 
-  return data as Book
+  const book = data as Book
+
+  // Fetch count of completed summaries (status = 'ingestion_complete')
+  const { count, error: summaryError } = await supabase
+    .from('summaries_v2')
+    .select('*', { count: 'exact', head: true })
+    .eq('book_id', id)
+    .eq('status', 'ingestion_complete')
+
+  if (!summaryError && count !== null) {
+    book.completed_summary_count = count
+  } else {
+    book.completed_summary_count = 0
+  }
+
+  return book
 }
 
 export async function createBook(formData: BookFormData) {

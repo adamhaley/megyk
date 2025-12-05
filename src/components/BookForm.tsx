@@ -5,10 +5,12 @@ import { Book, BookFormData } from '@/types/book'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import Tooltip from '@mui/material/Tooltip'
+import CoverImageUpload from './CoverImageUpload'
 
 interface BookFormProps {
   initialData?: Partial<Book>
@@ -96,21 +98,19 @@ export default function BookForm({
           disabled={isLoading}
         />
 
-        {/* Status */}
+        {/* Status - Read Only */}
         <TextField
           id="status"
           label="Status"
-          select
           fullWidth
-          value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          disabled={isLoading}
-        >
-          <MenuItem value="draft">Draft</MenuItem>
-          <MenuItem value="processing">Processing</MenuItem>
-          <MenuItem value="ingestion_complete">Ingestion Complete</MenuItem>
-          <MenuItem value="published">Published</MenuItem>
-        </TextField>
+          value={formData.status === 'ingestion_complete' ? 'Ingestion Complete' : formData.status === 'pending_ingest' ? 'Pending Ingest' : formData.status}
+          disabled
+          sx={{
+            '& .MuiInputBase-input': {
+              color: 'text.primary',
+            },
+          }}
+        />
 
         {/* Summary */}
         <TextField
@@ -167,40 +167,51 @@ export default function BookForm({
           />
         </Stack>
 
-        {/* Cover Image URL */}
-        <TextField
-          id="cover_image_url"
-          label="Cover Image URL"
-          type="url"
-          fullWidth
-          value={formData.cover_image_url}
-          onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
+        {/* Cover Image Upload */}
+        <CoverImageUpload
+          currentImageUrl={formData.cover_image_url}
+          onImageUploaded={(url) => setFormData({ ...formData, cover_image_url: url })}
+          onImageRemoved={() => setFormData({ ...formData, cover_image_url: '' })}
+          bookId={initialData?.id}
           disabled={isLoading}
         />
 
-        {/* Summary PDF URL */}
-        <TextField
-          id="default_summary_pdf_url"
-          label="Summary PDF URL"
-          type="url"
-          fullWidth
-          value={formData.default_summary_pdf_url}
-          onChange={(e) => setFormData({ ...formData, default_summary_pdf_url: e.target.value })}
-          disabled={isLoading}
-        />
+        {/* Live Checkbox - Disabled if summaries not complete */}
+        {(() => {
+          const completedSummaries = initialData?.completed_summary_count ?? 0
+          const hasCompletedSummaries = completedSummaries >= 9
+          const isLiveDisabled = isLoading || !hasCompletedSummaries
 
-        {/* Live Checkbox */}
-        <FormControlLabel
-          control={
-            <Checkbox
-              id="live"
-              checked={formData.live}
-              onChange={(e) => setFormData({ ...formData, live: e.target.checked })}
-              disabled={isLoading}
-            />
-          }
-          label="Mark as Live"
-        />
+          return (
+            <Box>
+              <Tooltip
+                title={
+                  !hasCompletedSummaries
+                    ? `Requires 9 completed summaries (currently: ${completedSummaries})`
+                    : 'Book can be marked as live'
+                }
+                arrow
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="live"
+                      checked={formData.live}
+                      onChange={(e) => setFormData({ ...formData, live: e.target.checked })}
+                      disabled={isLiveDisabled}
+                    />
+                  }
+                  label="Mark as Live"
+                />
+              </Tooltip>
+              {!hasCompletedSummaries && (
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 4, display: 'block', mt: -1 }}>
+                  Requires 9 completed summaries (currently: {completedSummaries})
+                </Typography>
+              )}
+            </Box>
+          )
+        })()}
 
         {/* Form Actions */}
         <Box

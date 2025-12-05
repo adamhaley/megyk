@@ -50,7 +50,7 @@ export default function BookDetail({ book }: BookDetailProps) {
     switch (status) {
       case 'ingestion_complete':
         return '#10b981'
-      case 'processing':
+      case 'pending_ingest':
         return '#f59e0b'
       default:
         return '#9ca3af'
@@ -61,10 +61,8 @@ export default function BookDetail({ book }: BookDetailProps) {
     switch (status) {
       case 'ingestion_complete':
         return 'Ingestion complete'
-      case 'processing':
-        return 'Processing'
-      case 'draft':
-        return 'Draft'
+      case 'pending_ingest':
+        return 'Pending ingest'
       default:
         return status
     }
@@ -151,7 +149,13 @@ export default function BookDetail({ book }: BookDetailProps) {
                   color: getStatusColor(book.status)
                 }} 
               />
-              <Typography variant="caption" color="text.secondary" fontWeight={500}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: book.status === 'ingestion_complete' ? '#10b981' : 'text.secondary',
+                  fontWeight: 500
+                }}
+              >
                 {getStatusLabel(book.status)}
               </Typography>
             </Stack>
@@ -227,16 +231,36 @@ export default function BookDetail({ book }: BookDetailProps) {
 
             {book.cover_image_url && (
               <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                   Cover Image
                 </Typography>
                 <MuiLink
                   href={book.cover_image_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{ mt: 0.5, display: 'inline-block' }}
+                  sx={{
+                    display: 'inline-block',
+                    '&:hover': {
+                      opacity: 0.9,
+                    },
+                  }}
                 >
-                  View Cover
+                  <Box
+                    component="img"
+                    src={book.cover_image_url}
+                    alt={`${book.title} cover`}
+                    sx={{
+                      maxWidth: 200,
+                      width: '100%',
+                      height: 'auto',
+                      aspectRatio: '2/3',
+                      objectFit: 'cover',
+                      borderRadius: 1,
+                      boxShadow: 2,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  />
                 </MuiLink>
               </Box>
             )}
