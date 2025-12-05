@@ -74,7 +74,7 @@ export default function EmailVerificationCard({ data, lastRunTime, loading, work
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, alignItems: 'flex-end' }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              Verifying via{' '}
+              Verifying 100/day via{' '}
               <Link 
                 href="https://truelist.io" 
                 target="_blank" 
@@ -89,7 +89,7 @@ export default function EmailVerificationCard({ data, lastRunTime, loading, work
               </Link>
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              Last verification ran {lastRunTime 
+              Last run {lastRunTime 
                 ? lastRunTime.toLocaleString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
