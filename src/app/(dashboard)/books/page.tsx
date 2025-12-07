@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import BookList from '@/components/BookList'
 import BookSearch from '@/components/BookSearch'
 import BookDropzone from '@/components/BookDropzone'
@@ -9,10 +8,8 @@ import { getBooks } from '@/lib/books'
 import { Book } from '@/types/book'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
 
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([])
@@ -77,39 +74,14 @@ export default function BooksPage() {
   return (
     <Box>
       {/* Header */}
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'stretch', sm: 'center' }}
-        spacing={2}
-        sx={{ mb: 4 }}
-      >
-        <Box>
-          <Typography variant="h3" component="h1" gutterBottom>
-            Book Summaries
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage your book collection
-          </Typography>
-        </Box>
-        <Button
-          component={Link}
-          href="/books/new"
-          variant="outlined"
-          size="medium"
-          startIcon={<AddIcon />}
-          sx={{
-            borderColor: 'divider',
-            color: 'text.primary',
-            '&:hover': {
-              borderColor: 'primary.main',
-              bgcolor: 'action.hover',
-            },
-          }}
-        >
-          Add New Book
-        </Button>
-      </Stack>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Book Summaries
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage your book collection
+        </Typography>
+      </Box>
 
       {/* Book Ingestion Dropzone */}
       <BookDropzone onUploadSuccess={() => fetchBooks(1, searchTerm)} />

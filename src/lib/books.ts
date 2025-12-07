@@ -78,15 +78,27 @@ export async function getBookById(id: string) {
 
   const book = data as Book
 
-  // Fetch count of completed summaries (status = 'ingestion_complete')
-  const { count, error: summaryError } = await supabase
+  // Fetch count of all summaries
+  const { count: totalCount, error: summaryError } = await supabase
+    .from('summaries_v2')
+    .select('*', { count: 'exact', head: true })
+    .eq('book_id', id)
+
+  if (!summaryError && totalCount !== null) {
+    book.summary_count = totalCount
+  } else {
+    book.summary_count = 0
+  }
+
+  // Also fetch count of completed summaries (status = 'ingestion_complete')
+  const { count: completedCount, error: completedError } = await supabase
     .from('summaries_v2')
     .select('*', { count: 'exact', head: true })
     .eq('book_id', id)
     .eq('status', 'ingestion_complete')
 
-  if (!summaryError && count !== null) {
-    book.completed_summary_count = count
+  if (!completedError && completedCount !== null) {
+    book.completed_summary_count = completedCount
   } else {
     book.completed_summary_count = 0
   }

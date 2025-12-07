@@ -178,16 +178,16 @@ export default function BookForm({
 
         {/* Live Checkbox - Disabled if summaries not complete */}
         {(() => {
-          const completedSummaries = initialData?.completed_summary_count ?? 0
-          const hasCompletedSummaries = completedSummaries >= 9
-          const isLiveDisabled = isLoading || !hasCompletedSummaries
+          const summaryCount = initialData?.summary_count ?? 0
+          const hasRequiredSummaries = summaryCount >= 9
+          const isLiveDisabled = isLoading || !hasRequiredSummaries
 
           return (
             <Box>
               <Tooltip
                 title={
-                  !hasCompletedSummaries
-                    ? `Requires 9 completed summaries (currently: ${completedSummaries})`
+                  !hasRequiredSummaries
+                    ? `Requires 9 summaries (currently: ${summaryCount})`
                     : 'Book can be marked as live'
                 }
                 arrow
@@ -204,9 +204,9 @@ export default function BookForm({
                   label="Mark as Live"
                 />
               </Tooltip>
-              {!hasCompletedSummaries && (
+              {!hasRequiredSummaries && (
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 4, display: 'block', mt: -1 }}>
-                  Requires 9 completed summaries (currently: {completedSummaries})
+                  Requires 9 summaries (currently: {summaryCount})
                 </Typography>
               )}
             </Box>
