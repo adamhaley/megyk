@@ -112,15 +112,20 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Final check - allow if role is admin (from JWT or database)
+  const isAdmin = role === 'admin'
+
   if (process.env.NODE_ENV === 'development') {
     console.log('Final role check before redirect:', {
       role,
-      roleIsAdmin: role === 'admin',
-      willRedirect: role !== 'admin',
+      roleIsAdmin: isAdmin,
+      willRedirect: !isAdmin,
+      userEmail: user.email,
+      userId: user.id,
     })
   }
 
-  if (role !== 'admin') {
+  if (!isAdmin) {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
 
