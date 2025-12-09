@@ -31,19 +31,54 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
+  // Get session to access JWT access token with custom claims
+  const { data: { session } } = await supabase.auth.getSession()
+
   // Check role from JWT claims
   // Supabase merges JWT custom claims differently depending on client type
-  // This triple-check ensures it always works
-  const role =
+  // Custom claims from auth.jwt_custom_claims() are in the JWT payload
+  // Try multiple locations where the role might be stored
+  let role: string | undefined
+
+  // First, try to decode the JWT access token to get custom claims
+  if (session?.access_token) {
+    try {
+      const payload = JSON.parse(
+        Buffer.from(session.access_token.split('.')[1], 'base64').toString()
+      )
+      role = payload.role
+    } catch (e) {
+      // JWT decode failed, continue to other checks
+    }
+  }
+
+  // Fallback to user metadata locations
+  role = role ??
     user.app_metadata?.role ??
     user.user_metadata?.role ??
     user.user_metadata?.claims?.role
+
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Middleware role check:', {
+      role,
+      hasSession: !!session,
+      userId: user.id,
+      app_metadata: user.app_metadata,
+      user_metadata: user.user_metadata,
+      jwtPayload: session?.access_token
+        ? JSON.parse(
+            Buffer.from(session.access_token.split('.')[1], 'base64').toString()
+          )
+        : null,
+    })
+  }
 
   if (role !== 'admin') {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
