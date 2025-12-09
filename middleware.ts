@@ -82,13 +82,21 @@ export async function middleware(req: NextRequest) {
 
   // If role is not in JWT (undefined), check database directly as fallback
   // This handles the case where user was promoted but hasn't logged out/in yet
-  if (role === undefined) {
+  if (role === undefined || role === null) {
     try {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('user_id', user.id)
         .single()
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Database fallback check:', {
+          profile,
+          profileError,
+          userId: user.id,
+        })
+      }
 
       if (profile?.role) {
         role = profile.role
@@ -102,6 +110,14 @@ export async function middleware(req: NextRequest) {
         console.log('Database fallback check failed:', error)
       }
     }
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Final role check before redirect:', {
+      role,
+      roleIsAdmin: role === 'admin',
+      willRedirect: role !== 'admin',
+    })
   }
 
   if (role !== 'admin') {
