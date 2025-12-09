@@ -32,48 +32,52 @@ export default async function DashboardLayout({
       safeRedirect('/login')
     }
 
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      {/* Desktop Sidebar - hidden on mobile */}
-      <Box
-        component="aside"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          width: 280,
-          position: 'fixed',
-          height: '100vh',
-        }}
-      >
-        <Sidebar userEmail={session.user.email} />
-      </Box>
+    // TypeScript assertion: session is guaranteed to be non-null here
+    // because redirect() throws and never returns
+    const userSession = session!
 
-      {/* Main content area - offset by sidebar width on desktop */}
-      <Box
-        sx={{
-          flex: 1,
-          ml: { xs: 0, md: '280px' },
-          width: '100%',
-          overflowX: 'hidden',
-        }}
-      >
-        {/* Mobile header with hamburger */}
-        <MobileNav userEmail={session.user.email} />
-
-        {/* Page content */}
-        <Container
-          component="main"
-          maxWidth="lg"
-          sx={{ py: 3, px: { xs: 2, sm: 3 } }}
+    return (
+      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+        {/* Desktop Sidebar - hidden on mobile */}
+        <Box
+          component="aside"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            width: 280,
+            position: 'fixed',
+            height: '100vh',
+          }}
         >
-          {children}
-        </Container>
+          <Sidebar userEmail={userSession.user.email} />
+        </Box>
+
+        {/* Main content area - offset by sidebar width on desktop */}
+        <Box
+          sx={{
+            flex: 1,
+            ml: { xs: 0, md: '280px' },
+            width: '100%',
+            overflowX: 'hidden',
+          }}
+        >
+          {/* Mobile header with hamburger */}
+          <MobileNav userEmail={userSession.user.email} />
+
+          {/* Page content */}
+          <Container
+            component="main"
+            maxWidth="lg"
+            sx={{ py: 3, px: { xs: 2, sm: 3 } }}
+          >
+            {children}
+          </Container>
+        </Box>
       </Box>
-    </Box>
-  )
-  } catch (error: any) {
+    )
+  } catch (error: unknown) {
     // If redirect was called, it throws - this is expected behavior
     // Re-throw to let Next.js handle the redirect properly
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+    if (error && typeof error === 'object' && 'digest' in error && typeof error.digest === 'string' && error.digest.startsWith('NEXT_REDIRECT')) {
       throw error
     }
     // For other errors, log and redirect safely
