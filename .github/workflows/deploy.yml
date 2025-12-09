@@ -11,7 +11,7 @@ jobs:
     environment: production
     
     steps:
-      - name: 🚀 Deploy to Server
+      - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.1
         with:
           host: ${{ secrets.HOST }}
@@ -19,23 +19,23 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             set -e
-            echo "📂 Navigating to project directory..."
-            cd ~/megyk || cd /root/megyk || cd /var/www/html/megyk
+            echo "Navigating to project directory..."
+            cd ~/megyk || cd /adam/megyk || cd /var/www/html/megyk
             echo "✓ Now in: $(pwd)"
             
-            echo "📥 Pulling latest code..."
+            echo "Pulling latest code..."
             git pull origin master
             
-            echo "🔍 Verifying deploy script exists..."
+            echo "Verifying deploy script exists..."
             ls -la .scripts/deploy.sh
             
-            echo "🚀 Running deployment..."
+            echo "Running deployment..."
             bash .scripts/deploy.sh
       
-      - name: ✅ Deployment Status
+      - name: Deployment Status
         if: success()
-        run: echo "🎉 Deployment successful!"
+        run: echo "Deployment successful!"
       
-      - name: ❌ Deployment Failed
+      - name: Deployment Failed
         if: failure()
-        run: echo "💥 Deployment failed - check logs"
+        run: echo "Deployment failed - check logs"

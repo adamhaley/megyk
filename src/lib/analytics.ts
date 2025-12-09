@@ -138,6 +138,8 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       .neq('email', ''),
     
     // Companies with first contact sent
+    // Note: This counts companies where first_contact_sent = true
+    // If emails are sent but this field isn't updated, the count will be inaccurate
     supabase
       .from('german_companies')
       .select('*', { count: 'exact', head: true })
@@ -185,6 +187,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     throw new Error(`Failed to fetch companies with email: ${emailError.message}`);
   }
   if (exportedError) {
+    console.error('[Pitch Paul] Query error:', exportedError);
     throw new Error(`Failed to fetch exported companies: ${exportedError.message}`);
   }
   if (postalCodeError) {
@@ -233,6 +236,16 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       ? Math.max(1, Math.round((exportedCompaniesCount / totalCompaniesCount) * 100))
       : 0
   };
+
+  // Debug logging for Pitch Paul count (can be removed after debugging)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Pitch Paul Analytics]', {
+      totalCompanies: totalCompaniesCount,
+      companiesWithFirstContactSent: exportedCompaniesCount,
+      percentage: pitchPaul.exportPercentage,
+      queryUsed: viewData ? 'SQL View (companies_stats)' : 'Direct Query (german_companies)'
+    });
+  }
 
   return {
     finderFelix,
