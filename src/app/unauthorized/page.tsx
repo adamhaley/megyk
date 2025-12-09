@@ -29,7 +29,7 @@ export default function Unauthorized() {
         // If API call fails, try to clear cookies manually and redirect
         window.location.href = '/login'
       }
-    } catch (error) {
+    } catch {
       // On error, just redirect to login
       window.location.href = '/login'
     }

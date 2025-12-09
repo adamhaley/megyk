@@ -13,13 +13,13 @@ export async function GET() {
     }
 
     // Decode JWT payload
-    let jwtPayload: any = null
+    let jwtPayload: { role?: string; [key: string]: unknown } | null = null
     if (session.access_token) {
       try {
         jwtPayload = JSON.parse(
           Buffer.from(session.access_token.split('.')[1], 'base64').toString()
-        )
-      } catch (e) {
+        ) as { role?: string; [key: string]: unknown }
+      } catch {
         // JWT decode failed
       }
     }
