@@ -14,11 +14,11 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
+import LogoutIcon from '@mui/icons-material/Logout'
 
 interface MobileNavProps {
   userEmail: string | undefined
@@ -39,12 +39,30 @@ const navigationLinks = [
 
 export default function MobileNav({ userEmail }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const pathname = usePathname()
 
   // Close menu on route change
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    try {
+      const response = await fetch('/auth/signout', {
+        method: 'POST',
+      })
+      
+      if (response.ok || response.redirected) {
+        window.location.href = '/login'
+      } else {
+        window.location.href = '/login'
+      }
+    } catch {
+      window.location.href = '/login'
+    }
+  }
 
   return (
     <>
@@ -73,7 +91,16 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
           <Typography variant="h6" component="h1" fontWeight="bold" sx={{ flexGrow: 1, textAlign: 'center' }}>
             Megyk
           </Typography>
-          <Box sx={{ width: 48 }} /> {/* Spacer for centering */}
+          <IconButton
+            edge="end"
+            color="inherit"
+            aria-label="Sign out"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            size="small"
+          >
+            <LogoutIcon fontSize="small" />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
@@ -162,38 +189,6 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
             </List>
           </Box>
 
-          {/* User info + Sign out */}
-          <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Typography
-                variant="body2"
-                color="text.primary"
-                sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                title={userEmail}
-              >
-                {userEmail}
-              </Typography>
-              <form action="/auth/signout" method="post">
-                <Button
-                  type="submit"
-                  fullWidth
-                  size="small"
-                  sx={{
-                    justifyContent: 'flex-start',
-                    color: 'text.secondary',
-                    textTransform: 'none',
-                    fontWeight: 400,
-                    '&:hover': {
-                      color: 'text.primary',
-                      bgcolor: 'action.hover',
-                    },
-                  }}
-                >
-                  Sign out
-                </Button>
-              </form>
-            </Box>
-          </Box>
         </Box>
       </Drawer>
     </>

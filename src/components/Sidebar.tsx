@@ -10,7 +10,6 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
 
@@ -129,38 +128,6 @@ export default function Sidebar({ userEmail }: SidebarProps) {
           </List>
         </Box>
 
-        {/* User info + Sign out */}
-        <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <Typography
-              variant="body2"
-              color="text.primary"
-              sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-              title={userEmail}
-            >
-              {userEmail}
-            </Typography>
-            <form action="/auth/signout" method="post">
-              <Button
-                type="submit"
-                fullWidth
-                size="small"
-                sx={{
-                  justifyContent: 'flex-start',
-                  color: 'text.secondary',
-                  textTransform: 'none',
-                  fontWeight: 400,
-                  '&:hover': {
-                    color: 'text.primary',
-                    bgcolor: 'action.hover',
-                  },
-                }}
-              >
-                Sign out
-              </Button>
-            </form>
-          </Box>
-        </Box>
       </Box>
     </Drawer>
   )

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import Sidebar from '@/components/Sidebar'
 import MobileNav from '@/components/MobileNav'
+import DashboardHeader from '@/components/DashboardHeader'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 
@@ -58,16 +59,34 @@ export default async function DashboardLayout({
             ml: { xs: 0, md: '280px' },
             width: '100%',
             overflowX: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {/* Mobile header with hamburger */}
           <MobileNav userEmail={userSession.user.email} />
 
+          {/* Desktop header with logout */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              px: 3,
+              py: 2,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.paper',
+            }}
+          >
+            <DashboardHeader userEmail={userSession.user.email} />
+          </Box>
+
           {/* Page content */}
           <Container
             component="main"
             maxWidth="lg"
-            sx={{ py: 3, px: { xs: 2, sm: 3 } }}
+            sx={{ py: 3, px: { xs: 2, sm: 3 }, flex: 1 }}
           >
             {children}
           </Container>
