@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -11,6 +12,28 @@ import { useRouter } from 'next/navigation'
 
 export default function Unauthorized() {
   const router = useRouter()
+  const [signingOut, setSigningOut] = useState(false)
+
+  const handleSignOut = async () => {
+    setSigningOut(true)
+    try {
+      // Call the signout API route to clear the session
+      const response = await fetch('/auth/signout', {
+        method: 'POST',
+      })
+      
+      if (response.ok || response.redirected) {
+        // Redirect to login page
+        window.location.href = '/login'
+      } else {
+        // If API call fails, try to clear cookies manually and redirect
+        window.location.href = '/login'
+      }
+    } catch (error) {
+      // On error, just redirect to login
+      window.location.href = '/login'
+    }
+  }
 
   return (
     <Box
@@ -42,6 +65,14 @@ export default function Unauthorized() {
           <Stack spacing={2} sx={{ mt: 4 }}>
             <Button
               variant="contained"
+              fullWidth
+              onClick={handleSignOut}
+              disabled={signingOut}
+            >
+              {signingOut ? 'Signing out...' : 'Sign Out & Login Again'}
+            </Button>
+            <Button
+              variant="outlined"
               fullWidth
               onClick={() => router.push('/login')}
             >

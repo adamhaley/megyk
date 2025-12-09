@@ -80,6 +80,30 @@ export async function middleware(req: NextRequest) {
     })
   }
 
+  // If role is not in JWT (undefined), check database directly as fallback
+  // This handles the case where user was promoted but hasn't logged out/in yet
+  if (role === undefined) {
+    try {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single()
+
+      if (profile?.role) {
+        role = profile.role
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Role found in database fallback:', role)
+        }
+      }
+    } catch (error) {
+      // Database check failed, continue with undefined role
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Database fallback check failed:', error)
+      }
+    }
+  }
+
   if (role !== 'admin') {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
