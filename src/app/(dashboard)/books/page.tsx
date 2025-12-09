@@ -8,7 +8,6 @@ import { getBooks } from '@/lib/books'
 import { Book } from '@/types/book'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
 import Alert from '@mui/material/Alert'
 
 export default function BooksPage() {

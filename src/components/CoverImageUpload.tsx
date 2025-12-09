@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, ChangeEvent, DragEvent } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -12,7 +11,6 @@ import Alert from '@mui/material/Alert'
 import ImageIcon from '@mui/icons-material/Image'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CloseIcon from '@mui/icons-material/Close'
 
 interface CoverImageUploadProps {
   currentImageUrl?: string | null
