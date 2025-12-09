@@ -20,18 +20,6 @@ echo "♻️  Restarting application..."
 # Check if megyk-dashboard service exists
 if systemctl is-active --quiet megyk-dashboard; then
   systemctl restart megyk-dashboard
-  echo "✅ Systemd restart complete (megyk-dashboard)"
-  systemctl status megyk-dashboard --no-pager || true
-elif systemctl is-active --quiet megyk; then
-  systemctl restart megyk
-  echo "✅ Systemd restart complete (megyk)"
-  systemctl status megyk --no-pager || true
-elif command -v pm2 &> /dev/null && pm2 list | grep -q megyk; then
-  pm2 restart megyk
-  echo "✅ PM2 restart complete"
-else
-  echo "⚠️  No service found - manual restart needed"
-  echo "⚠️  Run: systemctl restart megyk-dashboard"
 fi
 
 echo "🎉 Deployment complete!"
