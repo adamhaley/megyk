@@ -8,10 +8,11 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
-import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
+import Pagination from '@mui/material/Pagination'
+import PaginationItem from '@mui/material/PaginationItem'
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
@@ -20,8 +21,12 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 interface BookListProps {
   books: Book[]
   loading: boolean
-  hasMore: boolean
-  onLoadMore: () => void
+  totalCount: number
+  paginationModel: {
+    page: number
+    pageSize: number
+  }
+  onPaginationModelChange: (model: { page: number; pageSize: number }) => void
   onBookEnriched: (enrichedBook: Book) => void
 }
 
@@ -29,7 +34,14 @@ interface EnrichingState {
   [bookId: string]: 'idle' | 'loading' | 'success' | 'error'
 }
 
-export default function BookList({ books, loading, hasMore, onLoadMore, onBookEnriched }: BookListProps) {
+export default function BookList({ 
+  books, 
+  loading, 
+  totalCount,
+  paginationModel,
+  onPaginationModelChange,
+  onBookEnriched 
+}: BookListProps) {
   const [enrichingState, setEnrichingState] = useState<EnrichingState>({})
 
   // Check if book is missing any metadata fields that can be enriched
@@ -312,17 +324,44 @@ export default function BookList({ books, loading, hasMore, onLoadMore, onBookEn
         </Card>
       ))}
 
-      {/* Load More Button */}
-      {hasMore && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 3 }}>
-          <Button
-            onClick={onLoadMore}
-            disabled={loading}
+      {/* Pagination */}
+      {totalCount > 0 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', pt: 4, pb: 2 }}>
+          <Pagination
+            key={`pagination-${paginationModel.page}`}
+            count={Math.ceil(totalCount / paginationModel.pageSize)}
+            page={paginationModel.page + 1}
+            onChange={(event, value) => {
+              onPaginationModelChange({
+                page: value - 1,
+                pageSize: paginationModel.pageSize,
+              })
+            }}
+            color="primary"
             variant="outlined"
-            size="large"
-          >
-            {loading ? 'Loading...' : 'Load More'}
-          </Button>
+            shape="rounded"
+            showFirstButton
+            showLastButton
+            renderItem={(props) => <PaginationItem {...props} />}
+            disabled={loading}
+            sx={{
+              '& .MuiPaginationItem-root': {
+                color: 'text.secondary',
+                borderColor: 'divider',
+                '&.Mui-selected': {
+                  bgcolor: 'rgba(0, 0, 0, 0.08)',
+                  color: 'text.primary',
+                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.12)',
+                  }
+                },
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                }
+              }
+            }}
+          />
         </Box>
       )}
     </Stack>

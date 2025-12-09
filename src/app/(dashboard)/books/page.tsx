@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import BookList from '@/components/BookList'
 import BookSearch from '@/components/BookSearch'
 import BookDropzone from '@/components/BookDropzone'
@@ -14,49 +14,66 @@ import Alert from '@mui/material/Alert'
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
-  const [hasMore, setHasMore] = useState(false)
-  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 5,
+  })
   const [searchTerm, setSearchTerm] = useState('')
   const [error, setError] = useState<string | null>(null)
-
-  const fetchBooks = async (currentPage: number, search: string, append = false) => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await getBooks({
-        search,
-        page: currentPage,
-        limit: 20,
-      })
-
-      if (append) {
-        setBooks((prev) => [...prev, ...result.data])
-      } else {
-        setBooks(result.data)
-      }
-
-      setHasMore(result.hasMore)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch books')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const prevSearchTermRef = useRef('')
 
   useEffect(() => {
-    fetchBooks(1, searchTerm)
-  }, [searchTerm])
+    let cancelled = false
+    
+    const fetchBooks = async () => {
+      setLoading(true)
+      setError(null)
 
-  const handleSearch = (search: string) => {
-    setSearchTerm(search)
-    setPage(1)
-  }
+      try {
+        const result = await getBooks({
+          search: searchTerm,
+          page: paginationModel.page + 1,
+          limit: paginationModel.pageSize,
+        })
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1
-    setPage(nextPage)
-    fetchBooks(nextPage, searchTerm, true)
+        if (!cancelled) {
+          setBooks(result.data)
+          setTotalCount(result.count)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch books')
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchBooks()
+    
+    return () => {
+      cancelled = true
+    }
+  }, [paginationModel.page, paginationModel.pageSize, searchTerm])
+
+  const handleSearch = useCallback((search: string) => {
+    // Only reset pagination if search term actually changed
+    if (prevSearchTermRef.current !== search) {
+      prevSearchTermRef.current = search
+      setSearchTerm(search)
+      setPaginationModel(prev => ({ ...prev, page: 0 }))
+    } else {
+      // Search term hasn't changed, just update the state without resetting pagination
+      setSearchTerm(search)
+    }
+  }, [])
+
+  const handlePaginationModelChange = (model: { page: number; pageSize: number }) => {
+    // Ensure we create a new object reference to trigger re-render
+    setPaginationModel({ page: model.page, pageSize: model.pageSize })
   }
 
   const handleBookEnriched = (enrichedBook: Book) => {
@@ -84,7 +101,9 @@ export default function BooksPage() {
       </Box>
 
       {/* Book Ingestion Dropzone */}
-      <BookDropzone onUploadSuccess={() => fetchBooks(1, searchTerm)} />
+      <BookDropzone onUploadSuccess={() => {
+        setPaginationModel({ page: 0, pageSize: paginationModel.pageSize })
+      }} />
 
       {/* Search */}
       <Box sx={{ mb: 3 }}>
@@ -102,8 +121,9 @@ export default function BooksPage() {
       <BookList
         books={books}
         loading={loading}
-        hasMore={hasMore}
-        onLoadMore={handleLoadMore}
+        totalCount={totalCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={handlePaginationModelChange}
         onBookEnriched={handleBookEnriched}
       />
     </Box>

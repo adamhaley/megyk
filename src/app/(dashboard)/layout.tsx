@@ -5,20 +5,32 @@ import MobileNav from '@/components/MobileNav'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 
+// Helper to safely redirect without header conflicts
+function safeRedirect(path: string) {
+  try {
+    redirect(path)
+  } catch (error) {
+    // redirect() throws internally - this is expected
+    // Re-throw to let Next.js handle it
+    throw error
+  }
+}
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createServerComponentClient()
+  try {
+    const supabase = await createServerComponentClient()
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-  if (!session) {
-    redirect('/login')
-  }
+    if (!session) {
+      safeRedirect('/login')
+    }
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -58,4 +70,14 @@ export default async function DashboardLayout({
       </Box>
     </Box>
   )
+  } catch (error: any) {
+    // If redirect was called, it throws - this is expected behavior
+    // Re-throw to let Next.js handle the redirect properly
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error
+    }
+    // For other errors, log and redirect safely
+    console.error('Auth check error in dashboard layout:', error)
+    safeRedirect('/login')
+  }
 }
