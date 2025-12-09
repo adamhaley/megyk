@@ -19,7 +19,7 @@ echo "♻️  Restarting application..."
 
 # Check if megyk-dashboard service exists
 if systemctl is-active --quiet megyk-dashboard; then
-  systemctl restart megyk-dashboard
+  sudo systemctl restart megyk-dashboard
 fi
 
 echo "🎉 Deployment complete!"

@@ -36,3 +36,4 @@ WHERE LOWER(TRIM(email)) IN (
 AND is_duplicate = false
 ORDER BY email;
 
+
