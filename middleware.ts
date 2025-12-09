@@ -43,7 +43,7 @@ export async function middleware(req: NextRequest) {
   // Check role from JWT claims
   // Supabase merges JWT custom claims differently depending on client type
   // Custom claims from auth.jwt_custom_claims() are in the JWT payload
-  // Try multiple locations where the role might be stored
+  // Note: Supabase's default "authenticated" role is NOT our custom role
   let role: string | undefined
 
   // First, try to decode the JWT access token to get custom claims
@@ -52,17 +52,24 @@ export async function middleware(req: NextRequest) {
       const payload = JSON.parse(
         Buffer.from(session.access_token.split('.')[1], 'base64').toString()
       )
-      role = payload.role
+      // Only use the role if it's NOT the default Supabase "authenticated" role
+      // Our custom role should be "admin" or "user"
+      if (payload.role && payload.role !== 'authenticated') {
+        role = payload.role
+      }
     } catch (e) {
       // JWT decode failed, continue to other checks
     }
   }
 
-  // Fallback to user metadata locations
-  role = role ??
-    user.app_metadata?.role ??
+  // Fallback to user metadata locations (but ignore "authenticated")
+  const metadataRole = user.app_metadata?.role ??
     user.user_metadata?.role ??
     user.user_metadata?.claims?.role
+  
+  if (metadataRole && metadataRole !== 'authenticated') {
+    role = metadataRole
+  }
 
   // Debug logging (remove in production)
   if (process.env.NODE_ENV === 'development') {
