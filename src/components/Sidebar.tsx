@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
@@ -51,32 +52,40 @@ export default function Sidebar({ userEmail }: SidebarProps) {
         {/* Header */}
         <Box
           sx={{
-            height: 64,
             display: 'flex',
             alignItems: 'center',
-            px: 3,
+            justifyContent: 'center',
+            px: 2,
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
         >
-          <Link 
+          <Link
             href="/"
             style={{ textDecoration: 'none', color: 'inherit' }}
           >
-            <Typography 
-              variant="h5" 
-              component="h2" 
-              fontWeight="bold"
-              sx={{ 
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                px: 1.5,
+                py: 1.5,
                 cursor: 'pointer',
                 transition: 'opacity 0.2s',
                 '&:hover': {
-                  opacity: 0.7
-                }
+                  opacity: 0.8,
+                },
               }}
             >
-              Megyk
-            </Typography>
+              <Image
+                src="/megyk.svg"
+                alt="Megyk"
+                width={480}
+                height={128}
+                style={{ maxHeight: 86, height: 'auto', width: 'auto' }}
+                priority
+              />
+            </Box>
           </Link>
         </Box>
 

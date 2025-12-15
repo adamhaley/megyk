@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
@@ -78,7 +79,11 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
           borderColor: 'divider',
         }}
       >
-        <Toolbar>
+        <Toolbar
+          sx={{
+            py: 1,
+          }}
+        >
           <IconButton
             edge="start"
             color="inherit"
@@ -88,9 +93,25 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="h1" fontWeight="bold" sx={{ flexGrow: 1, textAlign: 'center' }}>
-            Megyk
-          </Typography>
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+            <Link
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '4px 8px',
+              }}
+            >
+              <Image
+                src="/megyk.svg"
+                alt="Megyk"
+                width={440}
+                height={120}
+                style={{ maxHeight: 72, height: 'auto', width: 'auto' }}
+                priority
+              />
+            </Link>
+          </Box>
           <IconButton
             edge="end"
             color="inherit"
@@ -120,18 +141,32 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
           {/* Header with close button */}
           <Box
             sx={{
-              height: 64,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               px: 3,
+              py: 1,
               borderBottom: '1px solid',
               borderColor: 'divider',
             }}
           >
-            <Typography variant="h5" component="h2" fontWeight="bold">
-              Megyk
-            </Typography>
+            <Link
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '2px 2px',
+              }}
+            >
+              <Image
+                src="/megyk.svg"
+                alt="Megyk"
+                width={240}
+                height={64}
+                style={{ maxHeight: 43, height: 'auto', width: 'auto' }}
+                priority
+              />
+            </Link>
             <IconButton
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
