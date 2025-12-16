@@ -109,6 +109,7 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
                 height={120}
                 style={{ maxHeight: 72, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
+                unoptimized
               />
             </Link>
           </Box>
@@ -165,6 +166,7 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
                 height={64}
                 style={{ maxHeight: 43, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
+                unoptimized
               />
             </Link>
             <IconButton

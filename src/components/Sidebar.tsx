@@ -87,6 +87,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
                 height={128}
                 style={{ maxHeight: 86, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
+                unoptimized
               />
             </Box>
           </Link>
