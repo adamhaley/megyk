@@ -74,6 +74,7 @@ export default async function DashboardLayout({
               justifyContent: 'flex-end',
               px: 3,
               py: 2,
+              height: '64px',
               borderBottom: '1px solid',
               borderColor: 'divider',
               bgcolor: 'background.paper',

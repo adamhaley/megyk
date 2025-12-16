@@ -99,15 +99,15 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                padding: '4px 8px',
+                padding: '4px 32px',
               }}
             >
               <Image
-                src="/megyk.svg"
+                src="/megyk-logo-no-book.png"
                 alt="Megyk"
                 width={440}
                 height={120}
-                style={{ maxHeight: 72, height: 'auto', width: 'auto' }}
+                style={{ maxHeight: 72, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
               />
             </Link>
@@ -145,7 +145,7 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
               alignItems: 'center',
               justifyContent: 'space-between',
               px: 3,
-              py: 1,
+              py: 1.5,
               borderBottom: '1px solid',
               borderColor: 'divider',
             }}
@@ -155,15 +155,15 @@ export default function MobileNav({ userEmail }: MobileNavProps) {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                padding: '2px 2px',
+                padding: '4px 24px',
               }}
             >
               <Image
-                src="/megyk.svg"
+                src="/megyk-logo-no-book.png"
                 alt="Megyk"
                 width={240}
                 height={64}
-                style={{ maxHeight: 43, height: 'auto', width: 'auto' }}
+                style={{ maxHeight: 43, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
               />
             </Link>

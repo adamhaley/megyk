@@ -55,21 +55,24 @@ export default function Sidebar({ userEmail }: SidebarProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            px: 2,
+            px: 2.5,
+            py: 2,
+            height: '64px',
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
         >
           <Link
             href="/"
-            style={{ textDecoration: 'none', color: 'inherit' }}
+            style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
           >
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                px: 1.5,
-                py: 1.5,
+                justifyContent: 'center',
+                px: 2,
+                py: 0,
                 cursor: 'pointer',
                 transition: 'opacity 0.2s',
                 '&:hover': {
@@ -78,11 +81,11 @@ export default function Sidebar({ userEmail }: SidebarProps) {
               }}
             >
               <Image
-                src="/megyk.svg"
+                src="/megyk-logo-no-book.png"
                 alt="Megyk"
                 width={480}
                 height={128}
-                style={{ maxHeight: 86, height: 'auto', width: 'auto' }}
+                style={{ maxHeight: 86, height: 'auto', width: 'auto', maxWidth: '100%', objectFit: 'contain' }}
                 priority
               />
             </Box>
