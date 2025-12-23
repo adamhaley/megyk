@@ -49,7 +49,7 @@ export default async function DashboardLayout({
             height: '100vh',
           }}
         >
-          <Sidebar userEmail={userSession.user.email} />
+          <Sidebar />
         </Box>
 
         {/* Main content area - offset by sidebar width on desktop */}
@@ -64,7 +64,7 @@ export default async function DashboardLayout({
           }}
         >
           {/* Mobile header with hamburger */}
-          <MobileNav userEmail={userSession.user.email} />
+          <MobileNav />
 
           {/* Desktop header with logout */}
           <Box
