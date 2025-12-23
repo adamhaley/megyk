@@ -31,7 +31,7 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.redirect(new URL('/login', req.url))
@@ -57,7 +57,7 @@ export async function middleware(req: NextRequest) {
       if (payload.role && payload.role !== 'authenticated') {
         role = payload.role
       }
-    } catch (e) {
+    } catch {
       // JWT decode failed, continue to other checks
     }
   }
@@ -152,4 +152,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|api|login|reset-password|unauthorized).*)',
   ],
 }
-

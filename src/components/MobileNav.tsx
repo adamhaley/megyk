@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import Drawer from '@mui/material/Drawer'
 import Box from '@mui/material/Box'
 import List from '@mui/material/List'
@@ -20,10 +19,6 @@ import CloseIcon from '@mui/icons-material/Close'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import LogoutIcon from '@mui/icons-material/Logout'
-
-interface MobileNavProps {
-  userEmail: string | undefined
-}
 
 const navigationLinks = [
   {
@@ -38,7 +33,7 @@ const navigationLinks = [
   },
 ]
 
-export default function MobileNav({ userEmail }: MobileNavProps) {
+export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const pathname = usePathname()

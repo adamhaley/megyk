@@ -10,13 +10,8 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import Typography from '@mui/material/Typography'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
-
-interface SidebarProps {
-  userEmail: string | undefined
-}
 
 const navigationLinks = [
   {
@@ -31,7 +26,7 @@ const navigationLinks = [
   },
 ]
 
-export default function Sidebar({ userEmail }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname()
 
   return (

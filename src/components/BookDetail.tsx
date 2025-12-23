@@ -18,6 +18,7 @@ import DialogActions from '@mui/material/DialogActions'
 import MuiLink from '@mui/material/Link'
 import Divider from '@mui/material/Divider'
 import Tooltip from '@mui/material/Tooltip'
+import Alert from '@mui/material/Alert'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
@@ -27,10 +28,19 @@ interface BookDetailProps {
   book: Book
 }
 
+type SummaryStyle = 'narrative' | 'bullet_points' | 'workbook'
+type SummaryLength = 'short' | 'medium' | 'long'
+
 export default function BookDetail({ book }: BookDetailProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [summaryStyle, setSummaryStyle] = useState<SummaryStyle>('narrative')
+  const [summaryLength, setSummaryLength] = useState<SummaryLength>('short')
+  const [summaryHtml, setSummaryHtml] = useState<string | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [summaryRequested, setSummaryRequested] = useState(false)
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -65,6 +75,42 @@ export default function BookDetail({ book }: BookDetailProps) {
         return 'Pending ingest'
       default:
         return status
+    }
+  }
+
+  const summaryStyles: SummaryStyle[] = ['narrative', 'bullet_points', 'workbook']
+  const summaryLengths: SummaryLength[] = ['short', 'medium', 'long']
+
+  const handlePreviewSummary = async (style: SummaryStyle, length: SummaryLength) => {
+    setSummaryStyle(style)
+    setSummaryLength(length)
+    setSummaryLoading(true)
+    setSummaryError(null)
+    setSummaryRequested(true)
+
+    try {
+      const response = await fetch('/api/get-summary-html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          book_id: book.id,
+          style,
+          length,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(errorText || 'Failed to fetch summary preview')
+      }
+
+      const data = (await response.json()) as { html?: string }
+      setSummaryHtml(data.html ?? '')
+    } catch (error) {
+      setSummaryError(error instanceof Error ? error.message : 'Failed to fetch summary preview')
+      setSummaryHtml(null)
+    } finally {
+      setSummaryLoading(false)
     }
   }
 
@@ -301,6 +347,111 @@ export default function BookDetail({ book }: BookDetailProps) {
           </Box>
         </Stack>
       </Paper>
+
+      <Box sx={{ mt: 4 }}>
+        <Paper
+          sx={{
+            p: { xs: 3, sm: 4 },
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Stack spacing={3}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Summary Preview
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Select a style and length to generate an HTML preview from n8n.
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 1.5,
+              }}
+            >
+              {summaryStyles.map((style) =>
+                summaryLengths.map((length) => {
+                  const isActive = summaryStyle === style && summaryLength === length
+                  return (
+                    <Button
+                      key={`${style}-${length}`}
+                      onClick={() => handlePreviewSummary(style, length)}
+                      variant="outlined"
+                      sx={{
+                        borderColor: isActive ? 'primary.main' : 'divider',
+                        color: isActive ? 'primary.main' : 'text.secondary',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        fontFamily: 'inherit',
+                        bgcolor: isActive ? 'action.hover' : 'transparent',
+                        boxShadow: 'none',
+                        '&:hover': {
+                          borderColor: 'primary.main',
+                          bgcolor: 'action.hover',
+                        },
+                      }}
+                    >
+                      {style.replace('_', ' ')} · {length}
+                    </Button>
+                  )
+                })
+              )}
+            </Box>
+
+            {summaryLoading && (
+              <Typography variant="body2" color="text.secondary">
+                Fetching summary preview...
+              </Typography>
+            )}
+
+            {summaryError && (
+              <Alert severity="error">
+                {summaryError}
+              </Alert>
+            )}
+          </Stack>
+        </Paper>
+      </Box>
+
+      <Box sx={{ mt: 3 }}>
+        {summaryHtml ? (
+          <Box
+            sx={{
+              width: '100%',
+              p: { xs: 2, sm: 3 },
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: 'background.paper',
+            }}
+            dangerouslySetInnerHTML={{ __html: summaryHtml }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: '100%',
+              p: { xs: 2, sm: 3 },
+              borderRadius: 2,
+              border: '1px dashed',
+              borderColor: 'divider',
+              color: 'text.secondary',
+            }}
+          >
+            <Typography variant="body2">
+              {summaryRequested && !summaryLoading && !summaryError
+                ? 'No preview returned for that selection. Check the n8n execution output.'
+                : 'Select a style and length to generate a preview.'}
+            </Typography>
+          </Box>
+        )}
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
