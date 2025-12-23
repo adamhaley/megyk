@@ -19,6 +19,7 @@ import MuiLink from '@mui/material/Link'
 import Divider from '@mui/material/Divider'
 import Tooltip from '@mui/material/Tooltip'
 import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
@@ -35,8 +36,8 @@ export default function BookDetail({ book }: BookDetailProps) {
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [summaryStyle, setSummaryStyle] = useState<SummaryStyle>('narrative')
-  const [summaryLength, setSummaryLength] = useState<SummaryLength>('short')
+  const [summaryStyle, setSummaryStyle] = useState<SummaryStyle | null>(null)
+  const [summaryLength, setSummaryLength] = useState<SummaryLength | null>(null)
   const [summaryHtml, setSummaryHtml] = useState<string | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
@@ -421,7 +422,24 @@ export default function BookDetail({ book }: BookDetailProps) {
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        {summaryHtml ? (
+        {summaryLoading ? (
+          <Box
+            sx={{
+              width: '100%',
+              minHeight: 180,
+              p: { xs: 2, sm: 3 },
+              borderRadius: 2,
+              border: '1px dashed',
+              borderColor: 'divider',
+              color: 'text.secondary',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CircularProgress size={28} />
+          </Box>
+        ) : summaryHtml ? (
           <Box
             sx={{
               width: '100%',
@@ -445,7 +463,7 @@ export default function BookDetail({ book }: BookDetailProps) {
             }}
           >
             <Typography variant="body2">
-              {summaryRequested && !summaryLoading && !summaryError
+              {summaryRequested && !summaryError
                 ? 'No preview returned for that selection. Check the n8n execution output.'
                 : 'Select a style and length to generate a preview.'}
             </Typography>
