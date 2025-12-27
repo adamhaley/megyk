@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Book } from '@/types/book'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -158,6 +159,44 @@ export default function BookList({
         >
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
+              {/* Cover Image Thumbnail */}
+              <Box sx={{ mr: 2, flexShrink: 0 }}>
+                {book.cover_image_url ? (
+                  <Box sx={{ position: 'relative', width: '60px', height: '80px' }}>
+                    <Image
+                      src={book.cover_image_url}
+                      alt={`${book.title} cover`}
+                      fill
+                      style={{
+                        objectFit: 'cover',
+                        borderRadius: '4px',
+                        border: '1px solid #e0e0e0'
+                      }}
+                      onError={() => {
+                        // Handle error by showing fallback
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      width: '60px',
+                      height: '80px',
+                      bgcolor: 'grey.200',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                      No Cover
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
               <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
                 <Typography variant="h6" component="h3" noWrap gutterBottom>
                   {book.title}
