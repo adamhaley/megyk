@@ -162,7 +162,7 @@ export default function BookList({
               {/* Cover Image Thumbnail */}
               <Box sx={{ mr: 2, flexShrink: 0 }}>
                 {book.cover_image_url ? (
-                  <Box sx={{ position: 'relative', width: '60px', height: '80px' }}>
+                  <Box sx={{ position: 'relative', width: '80px', height: '120px' }}>
                     <Image
                       src={book.cover_image_url}
                       alt={`${book.title} cover`}
@@ -180,8 +180,8 @@ export default function BookList({
                 ) : (
                   <Box
                     sx={{
-                      width: '60px',
-                      height: '80px',
+                      width: '80px',
+                      height: '120px',
                       bgcolor: 'grey.200',
                       border: '1px solid #e0e0e0',
                       borderRadius: '4px',
