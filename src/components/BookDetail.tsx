@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Book } from '@/types/book'
@@ -24,6 +24,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import { supabase } from '@/lib/supabase'
 
 interface BookDetailProps {
   book: Book
@@ -42,6 +43,9 @@ export default function BookDetail({ book }: BookDetailProps) {
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
   const [summaryRequested, setSummaryRequested] = useState(false)
+  const [availableSummaryKeys, setAvailableSummaryKeys] = useState<Set<string>>(new Set())
+  const [availabilityLoading, setAvailabilityLoading] = useState(false)
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null)
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -81,6 +85,43 @@ export default function BookDetail({ book }: BookDetailProps) {
 
   const summaryStyles: SummaryStyle[] = ['narrative', 'bullet_points', 'workbook']
   const summaryLengths: SummaryLength[] = ['short', 'medium', 'long']
+  const summaryKey = (style: SummaryStyle, length: SummaryLength) => `${style}:${length}`
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchAvailability = async () => {
+      setAvailabilityLoading(true)
+      setAvailabilityError(null)
+
+      const { data, error } = await supabase
+        .from('summaries_v2')
+        .select('style, length')
+        .eq('book_id', book.id)
+
+      if (cancelled) {
+        return
+      }
+
+      if (error) {
+        setAvailabilityError('Failed to load summary availability.')
+        setAvailableSummaryKeys(new Set())
+      } else {
+        const keys = new Set(
+          (data ?? []).map((row) => summaryKey(row.style as SummaryStyle, row.length as SummaryLength))
+        )
+        setAvailableSummaryKeys(keys)
+      }
+
+      setAvailabilityLoading(false)
+    }
+
+    fetchAvailability()
+
+    return () => {
+      cancelled = true
+    }
+  }, [book.id])
 
   const handlePreviewSummary = async (style: SummaryStyle, length: SummaryLength) => {
     setSummaryStyle(style)
@@ -378,11 +419,14 @@ export default function BookDetail({ book }: BookDetailProps) {
               {summaryStyles.map((style) =>
                 summaryLengths.map((length) => {
                   const isActive = summaryStyle === style && summaryLength === length
+                  const isAvailable = availableSummaryKeys.has(summaryKey(style, length))
+                  const isDisabled = availabilityLoading || !isAvailable
                   return (
                     <Button
                       key={`${style}-${length}`}
                       onClick={() => handlePreviewSummary(style, length)}
                       variant="outlined"
+                      disabled={isDisabled}
                       sx={{
                         borderColor: isActive ? 'primary.main' : 'divider',
                         color: isActive ? 'primary.main' : 'text.secondary',
@@ -397,6 +441,10 @@ export default function BookDetail({ book }: BookDetailProps) {
                           borderColor: 'primary.main',
                           bgcolor: 'action.hover',
                         },
+                        '&.Mui-disabled': {
+                          borderColor: 'divider',
+                          color: 'text.disabled',
+                        },
                       }}
                     >
                       {style.replace('_', ' ')} · {length}
@@ -405,6 +453,18 @@ export default function BookDetail({ book }: BookDetailProps) {
                 })
               )}
             </Box>
+
+            {availabilityLoading && (
+              <Typography variant="body2" color="text.secondary">
+                Checking summary availability...
+              </Typography>
+            )}
+
+            {availabilityError && (
+              <Alert severity="warning">
+                {availabilityError}
+              </Alert>
+            )}
 
             {summaryLoading && (
               <Typography variant="body2" color="text.secondary">
