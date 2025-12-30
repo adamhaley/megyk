@@ -401,9 +401,17 @@ export default function BookDetail({ book }: BookDetailProps) {
         >
           <Stack spacing={3}>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Summary Preview
-              </Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ gap: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Summary Preview
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {availableSummaryKeys.size < 9
+                    ? 'Summaries generating... '
+                    : ''}
+                  {availableSummaryKeys.size} of 9 summaries available.
+                </Typography>
+              </Stack>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                 Select a style and length to generate an HTML preview from n8n.
               </Typography>
