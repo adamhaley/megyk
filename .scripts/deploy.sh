@@ -1,18 +1,9 @@
 #!/bin/bash
-set -e  # Exit on error
-set -u  # Exit on undefined variable
+set -e
 
-echo "Starting deployment..."
+echo "Deploying .."
 
-# Note: git pull is done in the GitHub Action workflow before this script runs
+git pull origin master
+docker compose -f ../n8n-docker-caddy/docker-compose.yml up -d --build megyk-dashboard
 
-# Install dependencies
-echo "Installing dependencies..."
-yarn install --frozen-lockfile
-
-# Build the application
-echo "🔨 Building application..."
-yarn build
-
-
-echo "Deployment complete!"
+echo "Deploy complete!"
