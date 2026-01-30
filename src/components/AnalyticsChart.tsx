@@ -90,7 +90,7 @@ export default function AnalyticsChart({ title, subtitle, data, centerText }: An
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value, name) => [`${value}%`, name]} />
+              <Tooltip formatter={(value, name) => [centerText ? `${value}%` : value, name]} />
               <Legend 
                 wrapperStyle={{ fontSize: '12px', bottom: 20 }}
                 verticalAlign="bottom" 
