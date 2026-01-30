@@ -32,16 +32,20 @@ export async function GET() {
     // Pad forward to the current month if data stops before now
     if (cumulative_users.length > 0) {
       const last = cumulative_users[cumulative_users.length - 1]
-      const lastDate = new Date(last.month + '-01')
+      const [lastYear, lastMonth] = last.month.split('-').map(Number)
       const now = new Date()
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      let cursor = new Date(lastDate.getFullYear(), lastDate.getMonth() + 1, 1)
-      while (cursor <= currentMonth) {
+      const nowYear = now.getFullYear()
+      const nowMonth = now.getMonth() + 1 // 1-indexed
+      let curYear = lastYear
+      let curMonth = lastMonth + 1
+      if (curMonth > 12) { curMonth = 1; curYear++ }
+      while (curYear < nowYear || (curYear === nowYear && curMonth <= nowMonth)) {
         cumulative_users.push({
-          month: cursor.toISOString().slice(0, 7),
+          month: `${curYear}-${String(curMonth).padStart(2, '0')}`,
           total: last.total,
         })
-        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
+        curMonth++
+        if (curMonth > 12) { curMonth = 1; curYear++ }
       }
     }
     signupStats.cumulative_users = cumulative_users
