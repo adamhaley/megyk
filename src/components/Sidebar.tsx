@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -12,12 +13,18 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
+import QueryStatsIcon from '@mui/icons-material/QueryStats'
 
 const navigationLinks = [
   {
     name: 'Book Summaries',
     href: '/books',
     icon: MenuBookIcon,
+  },
+  {
+    name: 'Usage & Stats',
+    href: '/usage',
+    icon: QueryStatsIcon,
   },
   {
     name: 'Sales Campaign',
@@ -28,6 +35,11 @@ const navigationLinks = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <Drawer
@@ -92,7 +104,7 @@ export default function Sidebar() {
         <Box sx={{ flex: 1, py: 3 }}>
           <List sx={{ px: 2 }}>
             {navigationLinks.map((link) => {
-              const isActive = pathname.startsWith(link.href)
+              const isActive = mounted && pathname.startsWith(link.href)
               const Icon = link.icon
 
               return (

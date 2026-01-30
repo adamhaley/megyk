@@ -19,12 +19,18 @@ import CloseIcon from '@mui/icons-material/Close'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import BarChartIcon from '@mui/icons-material/BarChart'
 import LogoutIcon from '@mui/icons-material/Logout'
+import QueryStatsIcon from '@mui/icons-material/QueryStats'
 
 const navigationLinks = [
   {
     name: 'Book Summaries',
     href: '/books',
     icon: MenuBookIcon,
+  },
+  {
+    name: 'Usage & Stats',
+    href: '/usage',
+    icon: QueryStatsIcon,
   },
   {
     name: 'Sales Campaign',
@@ -36,7 +42,12 @@ const navigationLinks = [
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Close menu on route change
   useEffect(() => {
@@ -177,7 +188,7 @@ export default function MobileNav() {
           <Box sx={{ flex: 1, py: 3 }}>
             <List sx={{ px: 2 }}>
               {navigationLinks.map((link) => {
-                const isActive = pathname.startsWith(link.href)
+                const isActive = mounted && pathname.startsWith(link.href)
                 const Icon = link.icon
 
                 return (
