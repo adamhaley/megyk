@@ -23,7 +23,7 @@ export default function SupabaseProvider({
     // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: string, session: unknown) => {
       // Handle token refresh errors
       if (event === 'TOKEN_REFRESHED' && !session) {
         // Session expired, redirect to login

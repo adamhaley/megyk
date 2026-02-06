@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
+
+// Force dynamic rendering - these pages require auth and can't be statically generated
+export const dynamic = 'force-dynamic'
 import Sidebar from '@/components/Sidebar'
 import MobileNav from '@/components/MobileNav'
 import DashboardHeader from '@/components/DashboardHeader'

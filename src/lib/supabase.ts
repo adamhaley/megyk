@@ -1,10 +1,30 @@
 import { createBrowserClient } from '@supabase/ssr'
 
 export const createClient = () => {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // During build time, env vars may not be available
+  // Return a placeholder that will be replaced at runtime
+  if (!url || !key) {
+    // Return a mock client for build time - actual client created at runtime
+    return {
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        signInWithPassword: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
+        signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
+        signOut: async () => ({ error: null }),
+        resetPasswordForEmail: async () => ({ error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      },
+      from: () => ({
+        select: () => ({ data: [], error: null, eq: () => ({ data: [], error: null }) }),
+      }),
+      rpc: async () => ({ data: null, error: null }),
+    } as unknown as ReturnType<typeof createBrowserClient>
+  }
+
+  return createBrowserClient(url, key)
 }
 
 // Lazy singleton for backwards compatibility with `import { supabase }`

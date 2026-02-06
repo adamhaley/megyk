@@ -107,8 +107,8 @@ export default function BookDetail({ book }: BookDetailProps) {
         setAvailabilityError('Failed to load summary availability.')
         setAvailableSummaryKeys(new Set())
       } else {
-        const keys = new Set(
-          (data ?? []).map((row) => summaryKey(row.style as SummaryStyle, row.length as SummaryLength))
+        const keys = new Set<string>(
+          (data ?? []).map((row: { style: string; length: string }) => summaryKey(row.style as SummaryStyle, row.length as SummaryLength))
         )
         setAvailableSummaryKeys(keys)
       }
