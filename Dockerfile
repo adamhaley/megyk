@@ -5,7 +5,9 @@ WORKDIR /app
 
 # Install dependencies (cached layer)
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile --network-timeout 100000 || \
+    (sleep 5 && yarn install --frozen-lockfile --network-timeout 100000) || \
+    (sleep 10 && yarn install --frozen-lockfile --network-timeout 100000)
 
 # Copy source
 COPY . .
