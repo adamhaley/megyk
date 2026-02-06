@@ -17,6 +17,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
+          command_timeout: 30m
           script: |
             cd /opt/megyk/megyk/
             .scripts/deploy.sh
