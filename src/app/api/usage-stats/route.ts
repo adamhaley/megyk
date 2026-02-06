@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+let supabase: SupabaseClient | null = null
+
+function getSupabase() {
+  if (!supabase) {
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  }
+  return supabase
+}
 
 type Granularity = 'day' | 'week' | 'month'
 
@@ -21,6 +28,8 @@ export async function GET(request: NextRequest) {
   try {
     const granularity = (request.nextUrl.searchParams.get('granularity') || 'month') as Granularity
 
+    const supabaseClient = getSupabase()
+
     // Fetch user list via admin API for day/week granularity
     const allUsers: { created_at: string }[] = []
     if (granularity !== 'month') {
@@ -28,7 +37,7 @@ export async function GET(request: NextRequest) {
       let page = 1
       const perPage = 1000
       while (true) {
-        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage })
+        const { data, error } = await supabaseClient.auth.admin.listUsers({ page, perPage })
         if (error || !data.users.length) break
         allUsers.push(...data.users.map(u => ({ created_at: u.created_at || '' })))
         if (data.users.length < perPage) break
@@ -37,11 +46,11 @@ export async function GET(request: NextRequest) {
     }
 
     const [signupRpcResult, chatResult, suggestionsResult, summaryResult, booksResult] = await Promise.all([
-      supabase.rpc('get_signup_stats'),
-      supabase.from('chat_log').select('id, user_question, created_at'),
-      supabase.from('chat_suggestions').select('suggestion'),
-      supabase.from('summaries').select('style, length, book_id, user_id, created_at'),
-      supabase.from('books').select('id, title'),
+      supabaseClient.rpc('get_signup_stats'),
+      supabaseClient.from('chat_log').select('id, user_question, created_at'),
+      supabaseClient.from('chat_suggestions').select('suggestion'),
+      supabaseClient.from('summaries').select('style, length, book_id, user_id, created_at'),
+      supabaseClient.from('books').select('id, title'),
     ])
 
     // Signup stats from RPC (for total count and month fallback)
