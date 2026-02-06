@@ -10,6 +10,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
 import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   AreaChart, Area, BarChart, Bar,
@@ -67,6 +69,7 @@ export default function UsagePage() {
   const [chatStats, setChatStats] = useState<ChatStats | null>(null)
   const [summaryStats, setSummaryStats] = useState<SummaryStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [granularity, setGranularity] = useState<'day' | 'week' | 'month'>('month')
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     chats: false,
     summaries: false,
@@ -80,7 +83,7 @@ export default function UsagePage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/usage-stats')
+        const res = await fetch(`/api/usage-stats?granularity=${granularity}`)
         const data = await res.json()
         setSignupStats(data.signupStats)
         setChatStats(data.chatStats)
@@ -92,7 +95,7 @@ export default function UsagePage() {
       }
     }
     load()
-  }, [])
+  }, [granularity])
 
   if (loading) {
     return (
@@ -154,7 +157,19 @@ export default function UsagePage() {
       {signupStats && signupStats.cumulative_users && signupStats.cumulative_users.length > 0 && (
         <Card variant="outlined" sx={{ mb: 3 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>Cumulative User Growth</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6">Cumulative User Growth</Typography>
+              <ToggleButtonGroup
+                value={granularity}
+                exclusive
+                onChange={(_, value) => value && setGranularity(value)}
+                size="small"
+              >
+                <ToggleButton value="day">Day</ToggleButton>
+                <ToggleButton value="week">Week</ToggleButton>
+                <ToggleButton value="month">Month</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={signupStats.cumulative_users}>
                 <defs>
@@ -164,9 +179,33 @@ export default function UsagePage() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" interval="preserveStartEnd" tickFormatter={(v) => { const [y, m] = v.split('-'); return new Date(Number(y), Number(m) - 1).toLocaleDateString('en', { month: 'short', year: '2-digit' }); }} />
+                <XAxis
+                  dataKey="period"
+                  interval="preserveStartEnd"
+                  tickFormatter={(v) => {
+                    const parts = v.split('-')
+                    // Handle both month format (2025-01) and day/week format (2025-01-15)
+                    if (parts.length === 2) {
+                      return new Date(Number(parts[0]), Number(parts[1]) - 1).toLocaleDateString('en', { month: 'short', year: '2-digit' })
+                    } else if (parts.length >= 3) {
+                      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).toLocaleDateString('en', { month: 'short', day: 'numeric' })
+                    }
+                    return v
+                  }}
+                />
                 <YAxis allowDecimals={false} />
-                <Tooltip labelFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'long', year: 'numeric' })} />
+                <Tooltip
+                  labelFormatter={(v) => {
+                    const parts = String(v).split('-')
+                    if (parts.length === 2) {
+                      return new Date(Number(parts[0]), Number(parts[1]) - 1).toLocaleDateString('en', { month: 'long', year: 'numeric' })
+                    } else if (parts.length >= 3) {
+                      const dateStr = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).toLocaleDateString('en', { month: 'long', day: 'numeric', year: 'numeric' })
+                      return granularity === 'week' ? `Week of ${dateStr}` : dateStr
+                    }
+                    return String(v)
+                  }}
+                />
                 <Area type="monotone" dataKey="total" stroke="#2563eb" strokeWidth={2} fill="url(#userGradient)" />
               </AreaChart>
             </ResponsiveContainer>

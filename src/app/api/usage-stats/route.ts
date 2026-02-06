@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -6,9 +6,37 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET() {
+type Granularity = 'day' | 'week' | 'month'
+
+function getWeekKey(dateStr: string): string {
+  const date = new Date(dateStr)
+  // Get Monday of the week
+  const day = date.getUTCDay()
+  const diff = date.getUTCDate() - day + (day === 0 ? -6 : 1)
+  const monday = new Date(date.setUTCDate(diff))
+  return monday.toISOString().slice(0, 10)
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const [signupResult, chatResult, suggestionsResult, summaryResult, booksResult] = await Promise.all([
+    const granularity = (request.nextUrl.searchParams.get('granularity') || 'month') as Granularity
+
+    // Fetch user list via admin API for day/week granularity
+    let allUsers: { created_at: string }[] = []
+    if (granularity !== 'month') {
+      // Paginate through all users
+      let page = 1
+      const perPage = 1000
+      while (true) {
+        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage })
+        if (error || !data.users.length) break
+        allUsers.push(...data.users.map(u => ({ created_at: u.created_at || '' })))
+        if (data.users.length < perPage) break
+        page++
+      }
+    }
+
+    const [signupRpcResult, chatResult, suggestionsResult, summaryResult, booksResult] = await Promise.all([
       supabase.rpc('get_signup_stats'),
       supabase.from('chat_log').select('id, user_question, created_at'),
       supabase.from('chat_suggestions').select('suggestion'),
@@ -16,39 +44,100 @@ export async function GET() {
       supabase.from('books').select('id, title'),
     ])
 
-    // Signup stats + cumulative users
-    const signupStats = signupResult.error
-      ? { total_users: 0, signups_by_month: [], cumulative_users: [] }
-      : signupResult.data
+    // Signup stats from RPC (for total count and month fallback)
+    const rpcData = signupRpcResult.error ? { total_users: 0, signups_by_month: [] } : signupRpcResult.data
+    const total_users = rpcData.total_users || 0
 
-    // Compute cumulative users from signups_by_month, padded to current month
-    const signupsByMonth = signupStats.signups_by_month || []
-    let runningTotal = 0
-    const cumulative_users = signupsByMonth.map((m: { month: string; count: number }) => {
-      runningTotal += m.count
-      return { month: m.month, total: runningTotal }
-    })
+    let cumulative_users: { period: string; total: number }[] = []
 
-    // Pad forward to the current month if data stops before now
-    if (cumulative_users.length > 0) {
-      const last = cumulative_users[cumulative_users.length - 1]
-      const [lastYear, lastMonth] = last.month.split('-').map(Number)
-      const now = new Date()
-      const nowYear = now.getFullYear()
-      const nowMonth = now.getMonth() + 1 // 1-indexed
-      let curYear = lastYear
-      let curMonth = lastMonth + 1
-      if (curMonth > 12) { curMonth = 1; curYear++ }
-      while (curYear < nowYear || (curYear === nowYear && curMonth <= nowMonth)) {
-        cumulative_users.push({
-          month: `${curYear}-${String(curMonth).padStart(2, '0')}`,
-          total: last.total,
-        })
-        curMonth++
+    if (granularity === 'month' || allUsers.length === 0) {
+      // Use RPC data for month view
+      const signupsByMonth: { month: string; count: number }[] = rpcData.signups_by_month || []
+      let runningTotal = 0
+      cumulative_users = signupsByMonth.map((m) => {
+        runningTotal += m.count
+        const period = m.month.slice(0, 7)
+        return { period, total: runningTotal }
+      })
+
+      // Pad forward to current month
+      if (cumulative_users.length > 0) {
+        const last = cumulative_users[cumulative_users.length - 1]
+        const [lastYear, lastMonth] = last.period.split('-').map(Number)
+        const now = new Date()
+        const nowYear = now.getFullYear()
+        const nowMonth = now.getMonth() + 1
+        let curYear = lastYear
+        let curMonth = lastMonth + 1
         if (curMonth > 12) { curMonth = 1; curYear++ }
+        while (curYear < nowYear || (curYear === nowYear && curMonth <= nowMonth)) {
+          cumulative_users.push({
+            period: `${curYear}-${String(curMonth).padStart(2, '0')}`,
+            total: last.total,
+          })
+          curMonth++
+          if (curMonth > 12) { curMonth = 1; curYear++ }
+        }
+      }
+    } else {
+      // Use admin user data for day/week view
+      const signupMap: Record<string, number> = {}
+      for (const user of allUsers) {
+        if (!user.created_at) continue
+        let key: string
+        if (granularity === 'day') {
+          key = user.created_at.slice(0, 10)
+        } else {
+          key = getWeekKey(user.created_at)
+        }
+        signupMap[key] = (signupMap[key] || 0) + 1
+      }
+
+      const sortedPeriods = Object.entries(signupMap).sort(([a], [b]) => a.localeCompare(b))
+      let runningTotal = 0
+      cumulative_users = sortedPeriods.map(([period, count]) => {
+        runningTotal += count
+        return { period, total: runningTotal }
+      })
+
+      // Pad forward
+      if (cumulative_users.length > 0) {
+        const last = cumulative_users[cumulative_users.length - 1]
+        const now = new Date()
+
+        if (granularity === 'week') {
+          const lastDate = new Date(last.period)
+          const nowWeekKey = getWeekKey(now.toISOString())
+          let cursor = new Date(lastDate)
+          cursor.setDate(cursor.getDate() + 7)
+          while (cursor.toISOString().slice(0, 10) <= nowWeekKey) {
+            cumulative_users.push({
+              period: cursor.toISOString().slice(0, 10),
+              total: last.total,
+            })
+            cursor.setDate(cursor.getDate() + 7)
+          }
+        } else {
+          const lastDate = new Date(last.period)
+          const today = now.toISOString().slice(0, 10)
+          let cursor = new Date(lastDate)
+          cursor.setDate(cursor.getDate() + 1)
+          while (cursor.toISOString().slice(0, 10) <= today) {
+            cumulative_users.push({
+              period: cursor.toISOString().slice(0, 10),
+              total: last.total,
+            })
+            cursor.setDate(cursor.getDate() + 1)
+          }
+        }
       }
     }
-    signupStats.cumulative_users = cumulative_users
+
+    const signupStats = {
+      total_users,
+      cumulative_users,
+      granularity,
+    }
 
     // Chat stats
     const chats = chatResult.data || []

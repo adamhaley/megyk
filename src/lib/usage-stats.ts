@@ -2,8 +2,9 @@ import { supabase } from './supabase'
 
 export interface SignupStats {
   total_users: number
-  signups_by_month: { month: string; count: number }[]
-  cumulative_users: { month: string; total: number }[]
+  signups_by_month?: { month: string; count: number }[]
+  cumulative_users: { period: string; total: number }[]
+  granularity?: 'day' | 'week' | 'month'
 }
 
 export interface ChatStats {
