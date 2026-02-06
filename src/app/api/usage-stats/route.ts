@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const granularity = (request.nextUrl.searchParams.get('granularity') || 'month') as Granularity
 
     // Fetch user list via admin API for day/week granularity
-    let allUsers: { created_at: string }[] = []
+    const allUsers: { created_at: string }[] = []
     if (granularity !== 'month') {
       // Paginate through all users
       let page = 1
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
         if (granularity === 'week') {
           const lastDate = new Date(last.period)
           const nowWeekKey = getWeekKey(now.toISOString())
-          let cursor = new Date(lastDate)
+          const cursor = new Date(lastDate)
           cursor.setDate(cursor.getDate() + 7)
           while (cursor.toISOString().slice(0, 10) <= nowWeekKey) {
             cumulative_users.push({
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         } else {
           const lastDate = new Date(last.period)
           const today = now.toISOString().slice(0, 10)
-          let cursor = new Date(lastDate)
+          const cursor = new Date(lastDate)
           cursor.setDate(cursor.getDate() + 1)
           while (cursor.toISOString().slice(0, 10) <= today) {
             cumulative_users.push({
