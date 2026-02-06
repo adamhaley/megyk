@@ -46,10 +46,10 @@ export async function getBooks(filters: Partial<BookFilters> = {}) {
 
     if (!summaryError && summaryCounts) {
       // Count summaries per book
-      const countsByBookId = summaryCounts.reduce((acc, item) => {
+      const countsByBookId = summaryCounts.reduce((acc: Record<string, number>, item: { book_id: string }) => {
         acc[item.book_id] = (acc[item.book_id] || 0) + 1
         return acc
-      }, {} as Record<string, number>)
+      }, {})
 
       // Add summary_count to each book
       books.forEach((book) => {

@@ -272,7 +272,7 @@ export async function getEmailStatusDistribution(): Promise<EmailStatusCount[]> 
   const targetStatuses = ['ok:email_ok', 'risky:is_role', 'risky:accept_all'];
   
   // Count occurrences, grouping others as "unknown"
-  const statusCounts = (data || []).reduce((acc: Record<string, number>, row) => {
+  const statusCounts = (data || []).reduce((acc: Record<string, number>, row: { email_status: string }) => {
     const status = row.email_status;
     
     if (targetStatuses.includes(status)) {
