@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { createClient } from './supabase'
 
 export interface SignupStats {
   total_users: number
@@ -23,6 +23,7 @@ export interface SummaryStats {
 }
 
 export async function getSignupStats(): Promise<SignupStats> {
+  const supabase = createClient()
   const { data, error } = await supabase.rpc('get_signup_stats')
   if (error) {
     console.error('Failed to fetch signup stats:', error.message)
@@ -32,6 +33,7 @@ export async function getSignupStats(): Promise<SignupStats> {
 }
 
 export async function getChatStats(): Promise<ChatStats> {
+  const supabase = createClient()
   const { data: chats, error: chatError } = await supabase
     .from('chat_log')
     .select('id, user_question, created_at')
@@ -92,6 +94,7 @@ export async function getChatStats(): Promise<ChatStats> {
 }
 
 export async function getSummaryStats(): Promise<SummaryStats> {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('summaries_v2')
     .select('style, length')

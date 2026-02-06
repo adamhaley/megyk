@@ -7,12 +7,25 @@ export const createClient = () => {
   )
 }
 
-// Legacy export for existing code - lazily initialized
-let _supabase: ReturnType<typeof createClient> | null = null
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
-  get(_, prop) {
-    if (!_supabase) _supabase = createClient()
-    return (_supabase as Record<string, unknown>)[prop as string]
-  }
-})
+// Lazy singleton for backwards compatibility with `import { supabase }`
+let _instance: ReturnType<typeof createBrowserClient> | null = null
 
+function getInstance() {
+  if (!_instance) {
+    _instance = createClient()
+  }
+  return _instance
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const supabase = new Proxy({} as any, {
+  get(_, prop) {
+    const instance = getInstance()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const value = (instance as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(instance)
+    }
+    return value
+  }
+}) as ReturnType<typeof createBrowserClient>

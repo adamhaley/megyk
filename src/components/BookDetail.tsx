@@ -24,7 +24,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 
 interface BookDetailProps {
   book: Book
@@ -94,7 +94,7 @@ export default function BookDetail({ book }: BookDetailProps) {
       setAvailabilityLoading(true)
       setAvailabilityError(null)
 
-      const { data, error } = await supabase
+      const { data, error } = await createClient()
         .from('summaries_v2')
         .select('style, length')
         .eq('book_id', book.id)
