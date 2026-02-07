@@ -1,8 +1,9 @@
+import { Suspense } from 'react';
+import CompanyDashboard from '@/components/CompanyDashboard';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
-import ConstructionIcon from '@mui/icons-material/Construction';
 
 export default function USFinancialAdvisorsPage() {
   return (
@@ -16,18 +17,13 @@ export default function USFinancialAdvisorsPage() {
         </Typography>
       </Box>
 
-      <Paper sx={{ p: 6 }}>
-        <Stack alignItems="center" spacing={2}>
-          <ConstructionIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
-          <Typography variant="h5" color="text.secondary">
-            Coming Soon
-          </Typography>
-          <Typography variant="body1" color="text.secondary" textAlign="center">
-            The US Financial Advisors campaign is being set up.<br />
-            Data source and models will be configured shortly.
-          </Typography>
+      <Suspense fallback={
+        <Stack alignItems="center" justifyContent="center" sx={{ height: 256 }}>
+          <CircularProgress />
         </Stack>
-      </Paper>
+      }>
+        <CompanyDashboard campaign="us-financial-advisors" />
+      </Suspense>
     </Box>
   )
 }

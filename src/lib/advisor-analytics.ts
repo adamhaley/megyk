@@ -33,17 +33,17 @@ export async function getAdvisorAnalyticsData(): Promise<AdvisorAnalyticsData> {
     { count: advisorsWithEmail, error: emailError },
     { count: contactedAdvisors, error: contactedError }
   ] = await Promise.all([
-    // Total advisors
+    // Total advisors (is_duplicate is null or false)
     supabase
       .from('us_financial_advisors')
       .select('*', { count: 'exact', head: true })
-      .eq('is_duplicate', false),
+      .or('is_duplicate.is.null,is_duplicate.eq.false'),
 
     // Advisors with website (non-null and non-empty)
     supabase
       .from('us_financial_advisors')
       .select('*', { count: 'exact', head: true })
-      .eq('is_duplicate', false)
+      .or('is_duplicate.is.null,is_duplicate.eq.false')
       .not('website', 'is', null)
       .neq('website', ''),
 
@@ -51,7 +51,7 @@ export async function getAdvisorAnalyticsData(): Promise<AdvisorAnalyticsData> {
     supabase
       .from('us_financial_advisors')
       .select('*', { count: 'exact', head: true })
-      .eq('is_duplicate', false)
+      .or('is_duplicate.is.null,is_duplicate.eq.false')
       .not('email', 'is', null)
       .neq('email', ''),
 
@@ -59,7 +59,7 @@ export async function getAdvisorAnalyticsData(): Promise<AdvisorAnalyticsData> {
     supabase
       .from('us_financial_advisors')
       .select('*', { count: 'exact', head: true })
-      .eq('is_duplicate', false)
+      .or('is_duplicate.is.null,is_duplicate.eq.false')
       .eq('first_contact_sent', true)
   ]) as Array<{ count: number | null; error: PostgrestError | null }>;
 
@@ -111,7 +111,7 @@ export async function getAdvisorEmailStatusDistribution(): Promise<AdvisorEmailS
   const { data, error } = await supabase
     .from('us_financial_advisors')
     .select('email_status')
-    .eq('is_duplicate', false);
+    .or('is_duplicate.is.null,is_duplicate.eq.false');
 
   if (error) {
     throw new Error(`Failed to fetch email status distribution: ${error.message}`);

@@ -11,7 +11,7 @@ export async function getAdvisors(filters: Partial<AdvisorFilters> = {}) {
     .select('*', { count: 'exact' })
     .order('updated_at', { ascending: false, nullsFirst: false })
     .range(from, to)
-    .eq('is_duplicate', false);
+    .or('is_duplicate.is.null,is_duplicate.eq.false');
 
   // Search filter
   if (search) {
