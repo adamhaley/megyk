@@ -21,7 +21,19 @@ import BarChartIcon from '@mui/icons-material/BarChart'
 import LogoutIcon from '@mui/icons-material/Logout'
 import QueryStatsIcon from '@mui/icons-material/QueryStats'
 
-const navigationLinks = [
+interface NavChild {
+  name: string
+  href: string
+}
+
+interface NavLink {
+  name: string
+  href: string
+  icon: typeof MenuBookIcon
+  children?: NavChild[]
+}
+
+const navigationLinks: NavLink[] = [
   {
     name: 'Book Summaries',
     href: '/books',
@@ -36,18 +48,17 @@ const navigationLinks = [
     name: 'Sales Campaign',
     href: '/sales-campaign',
     icon: BarChartIcon,
+    children: [
+      { name: 'German Dentists', href: '/sales-campaign/german-dentists' },
+      { name: 'US Financial Advisors', href: '/sales-campaign/us-financial-advisors' },
+    ],
   },
 ]
 
 export default function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Close menu on route change
   useEffect(() => {
@@ -60,7 +71,7 @@ export default function MobileNav() {
       const response = await fetch('/auth/signout', {
         method: 'POST',
       })
-      
+
       if (response.ok || response.redirected) {
         window.location.href = '/login'
       } else {
@@ -188,9 +199,82 @@ export default function MobileNav() {
           <Box sx={{ flex: 1, py: 3 }}>
             <List sx={{ px: 2 }}>
               {navigationLinks.map((link) => {
-                const isActive = mounted && pathname.startsWith(link.href)
+                const hasChildren = link.children && link.children.length > 0
                 const Icon = link.icon
 
+                if (hasChildren) {
+                  return (
+                    <Box key={link.href}>
+                      {/* Parent label (non-clickable) */}
+                      <ListItem disablePadding sx={{ mb: 0.5 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 2,
+                            py: 1,
+                            width: '100%',
+                          }}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: 40,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            <Icon />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={link.name}
+                            primaryTypographyProps={{
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                              color: 'text.secondary',
+                            }}
+                          />
+                        </Box>
+                      </ListItem>
+                      {/* Children */}
+                      <List component="div" disablePadding>
+                        {link.children?.map((child) => {
+                          const isChildActive = pathname === child.href
+                          return (
+                            <ListItem key={child.href} disablePadding sx={{ mb: 0.5 }}>
+                              <ListItemButton
+                                component={Link}
+                                href={child.href}
+                                selected={isChildActive}
+                                sx={{
+                                  pl: 6,
+                                  borderRadius: 1.5,
+                                  '&.Mui-selected': {
+                                    bgcolor: 'rgba(37, 99, 235, 0.08)',
+                                    color: 'primary.main',
+                                    borderLeft: '4px solid',
+                                    borderColor: 'primary.main',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(37, 99, 235, 0.12)',
+                                    },
+                                  },
+                                }}
+                              >
+                                <ListItemText
+                                  primary={child.name}
+                                  primaryTypographyProps={{
+                                    fontSize: '0.8125rem',
+                                    fontWeight: 500,
+                                  }}
+                                />
+                              </ListItemButton>
+                            </ListItem>
+                          )
+                        })}
+                      </List>
+                    </Box>
+                  )
+                }
+
+                const isActive = pathname.startsWith(link.href)
                 return (
                   <ListItem key={link.href} disablePadding sx={{ mb: 0.5 }}>
                     <ListItemButton

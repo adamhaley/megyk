@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { GermanCompany } from '@/types/company';
+import { USFinancialAdvisor } from '@/types/advisor';
 import { getCompanies } from '@/lib/companies';
+import { getAdvisors } from '@/lib/advisors';
 import { getEmailStatusDistribution, EmailStatusCount } from '@/lib/analytics';
+import { getAdvisorEmailStatusDistribution } from '@/lib/advisor-analytics';
 import CompanyTable from './CompanyTable';
 import SearchBar from './SearchBar';
 import CompanyFilters, { FilterState } from './CompanyFilters';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import EmailVerificationCard from './EmailVerificationCard';
 import EmailWarmupCard from './EmailWarmupCard';
+
+export type CampaignType = 'german-dentists' | 'us-financial-advisors';
 
 interface DomainHealth {
   domain: string;
@@ -25,8 +30,15 @@ import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 
-export default function CompanyDashboard() {
-  const [companies, setCompanies] = useState<GermanCompany[]>([]);
+interface CompanyDashboardProps {
+  campaign: CampaignType;
+}
+
+// Union type for both data types (they're nearly identical)
+type CompanyOrAdvisor = GermanCompany | USFinancialAdvisor;
+
+export default function CompanyDashboard({ campaign }: CompanyDashboardProps) {
+  const [data, setData] = useState<CompanyOrAdvisor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -46,38 +58,47 @@ export default function CompanyDashboard() {
     emailStatus: null,
   });
 
-  const fetchCompanies = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const result = await getCompanies({
+      const params = {
         search,
         page: paginationModel.page + 1, // API uses 1-based, DataGrid uses 0-based
         limit: paginationModel.pageSize,
         contactSent: filters.contactSent ?? undefined,
         emailStatus: filters.emailStatus ?? undefined,
-      });
+      };
 
-      setCompanies(result.data);
-      setTotalCount(result.count);
+      if (campaign === 'german-dentists') {
+        const result = await getCompanies(params);
+        setData(result.data);
+        setTotalCount(result.count);
+      } else {
+        const result = await getAdvisors(params);
+        setData(result.data);
+        setTotalCount(result.count);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch companies');
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
-  }, [paginationModel.page, paginationModel.pageSize, search, filters]);
+  }, [campaign, paginationModel.page, paginationModel.pageSize, search, filters]);
 
   useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     const fetchEmailStatus = async () => {
       try {
         setEmailStatusLoading(true);
-        const data = await getEmailStatusDistribution();
-        setEmailStatusData(data);
+        const statusData = campaign === 'german-dentists'
+          ? await getEmailStatusDistribution()
+          : await getAdvisorEmailStatusDistribution();
+        setEmailStatusData(statusData);
       } catch (err) {
         console.error('Failed to fetch email status distribution:', err);
       } finally {
@@ -114,7 +135,7 @@ export default function CompanyDashboard() {
     fetchEmailStatus();
     fetchLastVerification();
     fetchEmailHealth();
-  }, []);
+  }, [campaign]);
 
   const handleSearch = (searchTerm: string) => {
     setSearch(searchTerm);
@@ -126,21 +147,24 @@ export default function CompanyDashboard() {
     setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page on filter change
   };
 
+  const entityLabel = campaign === 'german-dentists' ? 'Companies' : 'Advisors';
+  const entityLabelLower = campaign === 'german-dentists' ? 'companies' : 'advisors';
+
   if (error) {
     return (
-      <Alert 
-        severity="error" 
+      <Alert
+        severity="error"
         action={
-          <Button 
-            color="inherit" 
-            size="small" 
-            onClick={() => fetchCompanies()}
+          <Button
+            color="inherit"
+            size="small"
+            onClick={() => fetchData()}
           >
             Retry
           </Button>
         }
       >
-        <strong>Error loading companies</strong>
+        <strong>Error loading {entityLabelLower}</strong>
         <br />
         {error}
       </Alert>
@@ -149,7 +173,7 @@ export default function CompanyDashboard() {
 
   return (
     <Stack spacing={3}>
-      <AnalyticsDashboard />
+      <AnalyticsDashboard campaign={campaign} />
 
       <Box sx={{ mb: 4 }}>
         <Box
@@ -159,13 +183,13 @@ export default function CompanyDashboard() {
             gap: 3
           }}
         >
-          <EmailVerificationCard 
-            data={emailStatusData} 
+          <EmailVerificationCard
+            data={emailStatusData}
             loading={emailStatusLoading}
             lastRunTime={lastVerificationTime}
             workflowActive={workflowActive}
           />
-          
+
           <EmailWarmupCard
             domains={emailHealth}
             loading={emailHealthLoading}
@@ -174,7 +198,7 @@ export default function CompanyDashboard() {
           />
         </Box>
       </Box>
-      
+
       <Paper sx={{ p: 3 }}>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
@@ -185,19 +209,19 @@ export default function CompanyDashboard() {
         >
           <Box>
             <Typography variant="h6" component="h2">
-              Companies
+              {entityLabel}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {totalCount.toLocaleString()} total companies
+              {totalCount.toLocaleString()} total {entityLabelLower}
             </Typography>
           </Box>
           <SearchBar onSearch={handleSearch} />
         </Stack>
 
         <CompanyFilters onFilterChange={handleFilterChange} />
-        
-        <CompanyTable 
-          companies={companies} 
+
+        <CompanyTable
+          companies={data as GermanCompany[]}
           loading={loading}
           totalCount={totalCount}
           paginationModel={paginationModel}
