@@ -3,7 +3,7 @@
 A dual-purpose [Next.js 15](https://nextjs.org) application for Megyk.com featuring:
 
 1. **📚 Book Summaries Management System** - Complete CRUD interface for managing book summaries with PDF ingestion
-2. **📊 Sales Campaign Dashboard** - Analytics and data visualization for German dentist lead generation campaign
+2. **📊 Sales Campaign Dashboard** - Analytics and data visualization for lead generation campaigns
 
 ## Features
 
@@ -15,26 +15,32 @@ A dual-purpose [Next.js 15](https://nextjs.org) application for Megyk.com featur
 - ✅ Book metadata management (ISBN, cover images, publication year, etc.)
 
 ### Sales Campaign Analytics
-- ✅ Three-stage campaign tracking (Finder Felix, Analysis Anna, Pitch Paul)
+- ✅ Multi-campaign support with nested navigation
+  - **German Dentists** - Lead generation for German dental practices
+  - **US Financial Advisors** - Lead generation for US financial advisory firms
+- ✅ Campaign-specific analytics dashboards
+  - Finder Felix (postal code coverage) - German campaign only
+  - Enrichment metrics (website/email data quality)
+  - Outreach status tracking
 - ✅ Real-time analytics with donut charts
-- ✅ Company data management with search and pagination
+- ✅ Company/advisor data management with search and pagination
+- ✅ Email verification status tracking
+- ✅ Email domain health monitoring (SPF/DMARC/MX)
+- ✅ Duplicate detection and filtering
 - ✅ Optimized SQL queries with database views and RPC functions
-- ✅ Postal code coverage tracking
-- ✅ Data enrichment status monitoring
 
 ### General
 - ✅ Supabase authentication (email/password)
 - ✅ Server-side rendering with App Router
 - ✅ Responsive design (mobile and desktop)
-- ✅ Modern UI with Tailwind CSS 4
+- ✅ Modern UI with Material UI (MUI)
 
 ## Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS 4
+- **Styling**: Material UI (MUI)
 - **Database & Auth**: Supabase (PostgreSQL + Auth)
 - **Charts**: Recharts
-- **Icons**: Heroicons
 - **Automation**: n8n (webhook integration)
 - **Package Manager**: Yarn
 
@@ -56,6 +62,8 @@ yarn install
 # NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 # NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 # N8N_BASE_URL=https://n8n.megyk.com
+# N8N_API_KEY=your_n8n_api_key
+# VERIFICATION_WORKFLOW_ID=your_workflow_id
 ```
 
 ### Development
@@ -83,44 +91,60 @@ yarn start
 yarn lint
 ```
 
-## Database Setup
+## Database Schema
 
-Run the SQL migration to create optimized analytics views:
+### German Dentists Campaign
 
-```sql
--- Run the file: supabase/migrations/20240101000000_create_analytics_views.sql
-```
+**`german_companies`** - Company records for German dental practices
+**`german_zip_codes`** - German postal code reference data
+**`finder_felix_executions`** - Postal code scraping execution tracking
 
-This creates:
-- `companies_stats` view - Aggregated company statistics
-- `finder_felix_coverage` view - Postal code coverage metrics
-- `get_unique_postal_codes_count()` function - Unique postal code counter
+### US Financial Advisors Campaign
+
+**`us_financial_advisors`** - Advisor records for US financial advisory firms
+**`us_zip_codes`** - US postal code reference data with population/income metrics
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (dashboard)/          # Protected dashboard routes
-│   │   ├── books/            # Book management pages
-│   │   ├── sales-campaign/   # Sales analytics page
-│   │   └── layout.tsx        # Dashboard layout with auth
+│   ├── (dashboard)/              # Protected dashboard routes
+│   │   ├── books/                # Book management pages
+│   │   ├── sales-campaign/       # Sales campaign routes
+│   │   │   ├── german-dentists/      # German campaign page
+│   │   │   ├── us-financial-advisors/ # US campaign page
+│   │   │   └── page.tsx              # Redirects to default campaign
+│   │   └── layout.tsx            # Dashboard layout with auth
 │   ├── api/
-│   │   └── ingest-book/      # PDF upload API route
+│   │   ├── ingest-book/          # PDF upload API route
+│   │   ├── enrich-book/          # Book enrichment API route
+│   │   ├── email-health/         # Email domain health check
+│   │   └── verification-last-run/ # Verification workflow status
 │   ├── auth/
-│   │   └── signout/          # Sign out route
-│   ├── login/                # Login page
-│   └── page.tsx              # Home (redirects based on auth)
-├── components/               # Reusable React components
-├── lib/                      # Utilities and data fetching
-│   ├── supabase.ts          # Browser Supabase client
-│   ├── supabase-server.ts   # Server Supabase client (SSR)
-│   ├── books.ts             # Book CRUD operations
-│   ├── companies.ts         # Company data operations
-│   └── analytics.ts         # Analytics data fetching
-└── types/                    # TypeScript type definitions
+│   │   └── signout/              # Sign out route
+│   ├── login/                    # Login page
+│   └── page.tsx                  # Home (redirects based on auth)
+├── components/                   # Reusable React components
+│   ├── Sidebar.tsx               # Desktop navigation with nested items
+│   ├── MobileNav.tsx             # Mobile navigation
+│   ├── CompanyDashboard.tsx      # Main campaign dashboard (supports both campaigns)
+│   ├── AnalyticsDashboard.tsx    # Analytics charts (campaign-aware)
+│   ├── CompanyTable.tsx          # Data grid for companies/advisors
+│   ├── EmailVerificationCard.tsx # Email status distribution
+│   └── EmailWarmupCard.tsx       # Domain health monitoring
+├── lib/                          # Utilities and data fetching
+│   ├── supabase.ts               # Browser Supabase client
+│   ├── supabase-server.ts        # Server Supabase client (SSR)
+│   ├── books.ts                  # Book CRUD operations
+│   ├── companies.ts              # German companies data operations
+│   ├── advisors.ts               # US advisors data operations
+│   ├── analytics.ts              # German campaign analytics
+│   └── advisor-analytics.ts      # US campaign analytics
+└── types/                        # TypeScript type definitions
     ├── book.ts
-    └── company.ts
+    ├── company.ts                # GermanCompany interface
+    └── advisor.ts                # USFinancialAdvisor interface
 ```
 
 ## Deployment
@@ -131,5 +155,4 @@ The application is deployed on DigitalOcean behind Caddy reverse proxy at `megyk
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-
+- [Material UI Documentation](https://mui.com/material-ui/getting-started/)
