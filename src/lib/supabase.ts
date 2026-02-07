@@ -1,51 +1,84 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
 
-export const createClient = () => {
+// Build-time mock that returns chainable query builder methods
+const createBuildTimeMock = (): SupabaseClient => {
+  const chainable = (): unknown => ({
+    select: chainable,
+    eq: chainable,
+    neq: chainable,
+    gt: chainable,
+    gte: chainable,
+    lt: chainable,
+    lte: chainable,
+    like: chainable,
+    ilike: chainable,
+    is: chainable,
+    in: chainable,
+    contains: chainable,
+    containedBy: chainable,
+    range: chainable,
+    textSearch: chainable,
+    not: chainable,
+    or: chainable,
+    filter: chainable,
+    order: chainable,
+    limit: chainable,
+    single: chainable,
+    maybeSingle: chainable,
+    insert: chainable,
+    update: chainable,
+    upsert: chainable,
+    delete: chainable,
+    then: (resolve: (v: { data: []; error: null; count: 0 }) => void) =>
+      resolve({ data: [], error: null, count: 0 }),
+  })
+
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      getUser: async () => ({ data: { user: null }, error: null }),
+      signInWithPassword: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
+      signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
+      signOut: async () => ({ error: null }),
+      resetPasswordForEmail: async () => ({ error: null }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    },
+    from: chainable,
+    rpc: async () => ({ data: null, error: null }),
+  } as unknown as SupabaseClient
+}
+
+export const createClient = (): SupabaseClient => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // During build time, env vars may not be available
-  // Return a placeholder that will be replaced at runtime
   if (!url || !key) {
-    // Return a mock client for build time - actual client created at runtime
-    return {
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        signInWithPassword: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
-        signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Not available during build' } }),
-        signOut: async () => ({ error: null }),
-        resetPasswordForEmail: async () => ({ error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      },
-      from: () => ({
-        select: () => ({ data: [], error: null, eq: () => ({ data: [], error: null }) }),
-      }),
-      rpc: async () => ({ data: null, error: null }),
-    } as unknown as ReturnType<typeof createBrowserClient>
+    return createBuildTimeMock()
   }
 
-  return createBrowserClient(url, key)
+  return createSupabaseClient(url, key)
 }
 
-// Lazy singleton for backwards compatibility with `import { supabase }`
-let _instance: ReturnType<typeof createBrowserClient> | null = null
+// Runtime-only singleton - uses Object.defineProperty to defer evaluation
+let _supabase: SupabaseClient | undefined
 
-function getInstance() {
-  if (!_instance) {
-    _instance = createClient()
+export const getSupabase = (): SupabaseClient => {
+  if (!_supabase) {
+    _supabase = createClient()
   }
-  return _instance
+  return _supabase
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabase = new Proxy({} as any, {
-  get(_, prop) {
-    const instance = getInstance()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const value = (instance as any)[prop]
+// For backwards compatibility: proxy that defers to getSupabase() at access time
+// This ensures the real client is created at runtime, not build time
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_, prop: string) {
+    const client = getSupabase()
+    const value = client[prop as keyof SupabaseClient]
     if (typeof value === 'function') {
-      return value.bind(instance)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      return (value as Function).bind(client)
     }
     return value
-  }
-}) as ReturnType<typeof createBrowserClient>
+  },
+})
