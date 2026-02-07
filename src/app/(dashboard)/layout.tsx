@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
+import nextDynamic from 'next/dynamic'
 
 // Force dynamic rendering - these pages require auth and can't be statically generated
 export const dynamic = 'force-dynamic'
-import Sidebar from '@/components/Sidebar'
-import MobileNav from '@/components/MobileNav'
+
+// Client-only imports to avoid hydration mismatches with MUI
+const Sidebar = nextDynamic(() => import('@/components/Sidebar'), { ssr: false })
+const MobileNav = nextDynamic(() => import('@/components/MobileNav'), { ssr: false })
 import DashboardHeader from '@/components/DashboardHeader'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
