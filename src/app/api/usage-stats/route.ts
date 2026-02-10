@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
     const total_users = rpcData.total_users || 0
 
     let cumulative_users: { period: string; total: number }[] = []
+    let signups_per_period: { period: string; count: number }[] = []
 
     if (granularity === 'month' || allUsers.length === 0) {
       // Use RPC data for month view
@@ -68,6 +69,10 @@ export async function GET(request: NextRequest) {
         const period = m.month.slice(0, 7)
         return { period, total: runningTotal }
       })
+      signups_per_period = signupsByMonth.map((m) => ({
+        period: m.month.slice(0, 7),
+        count: m.count,
+      }))
 
       // Pad forward to current month
       if (cumulative_users.length > 0) {
@@ -103,6 +108,7 @@ export async function GET(request: NextRequest) {
       }
 
       const sortedPeriods = Object.entries(signupMap).sort(([a], [b]) => a.localeCompare(b))
+      signups_per_period = sortedPeriods.map(([period, count]) => ({ period, count }))
       let runningTotal = 0
       cumulative_users = sortedPeriods.map(([period, count]) => {
         runningTotal += count
@@ -145,6 +151,7 @@ export async function GET(request: NextRequest) {
     const signupStats = {
       total_users,
       cumulative_users,
+      signups_per_period,
       granularity,
     }
 

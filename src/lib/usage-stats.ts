@@ -4,6 +4,7 @@ export interface SignupStats {
   total_users: number
   signups_by_month?: { month: string; count: number }[]
   cumulative_users: { period: string; total: number }[]
+  signups_per_period: { period: string; count: number }[]
   granularity?: 'day' | 'week' | 'month'
 }
 
@@ -27,7 +28,7 @@ export async function getSignupStats(): Promise<SignupStats> {
   const { data, error } = await supabase.rpc('get_signup_stats')
   if (error) {
     console.error('Failed to fetch signup stats:', error.message)
-    return { total_users: 0, signups_by_month: [], cumulative_users: [] }
+    return { total_users: 0, signups_by_month: [], cumulative_users: [], signups_per_period: [] }
   }
   return data as SignupStats
 }
