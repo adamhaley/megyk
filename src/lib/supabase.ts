@@ -1,4 +1,5 @@
-import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 // Build-time mock that returns chainable query builder methods
 const createBuildTimeMock = (): SupabaseClient => {
@@ -56,7 +57,9 @@ export const createClient = (): SupabaseClient => {
     return createBuildTimeMock()
   }
 
-  return createSupabaseClient(url, key)
+  // Use createBrowserClient from @supabase/ssr to properly sync session with cookies
+  // This ensures the middleware can read the session for auth checks
+  return createBrowserClient(url, key)
 }
 
 // Runtime-only singleton - uses Object.defineProperty to defer evaluation
