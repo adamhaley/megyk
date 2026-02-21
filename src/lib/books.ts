@@ -145,6 +145,27 @@ export async function updateBook(id: string, formData: Partial<BookFormData>) {
 }
 
 export async function deleteBook(id: string) {
+  // Delete related chat_log records first (foreign key constraint)
+  const { error: chatLogError } = await supabase
+    .from('chat_log')
+    .delete()
+    .eq('book_id', id)
+
+  if (chatLogError) {
+    throw new Error(`Failed to delete related chat logs: ${chatLogError.message}`)
+  }
+
+  // Delete related summaries_v2 records (foreign key constraint)
+  const { error: summariesError } = await supabase
+    .from('summaries_v2')
+    .delete()
+    .eq('book_id', id)
+
+  if (summariesError) {
+    throw new Error(`Failed to delete related summaries: ${summariesError.message}`)
+  }
+
+  // Now delete the book
   const { error } = await supabase.from('books').delete().eq('id', id)
 
   if (error) {
