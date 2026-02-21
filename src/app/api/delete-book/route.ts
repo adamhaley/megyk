@@ -48,6 +48,20 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    // Delete related chat_suggestions records (foreign key constraint)
+    const { error: suggestionsError } = await supabase
+      .from('chat_suggestions')
+      .delete()
+      .eq('book_id', bookId)
+
+    if (suggestionsError) {
+      console.error('Failed to delete chat suggestions:', suggestionsError)
+      return NextResponse.json(
+        { error: `Failed to delete related chat suggestions: ${suggestionsError.message}` },
+        { status: 500 }
+      )
+    }
+
     // Now delete the book
     const { error: bookError } = await supabase
       .from('books')
