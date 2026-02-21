@@ -294,3 +294,50 @@ WHERE id NOT IN (
 )
 AND company IS NOT NULL;
 ```
+
+## Running Database Migrations
+
+Unlike Laravel's `php artisan migrate`, Next.js doesn't have built-in migration tools. Use one of these methods:
+
+### Option 1: Ninja Mode (Direct psql - Recommended for Self-Hosted)
+Uses the `DATABASE_URL` from `.env.local` to run migrations directly:
+
+```bash
+# Run a specific migration
+source .env.local && psql "$DATABASE_URL" -f supabase/migrations/001_example.sql
+
+# Or run all migrations in order
+source .env.local && for f in supabase/migrations/*.sql; do psql "$DATABASE_URL" -f "$f"; done
+
+# Interactive session for debugging
+source .env.local && psql "$DATABASE_URL"
+```
+
+Use this for:
+- Running migrations directly
+- Debugging database issues
+- Checking table contents, triggers, functions
+- Testing database functions
+
+This works with self-hosted Supabase where the CLI may not be configured.
+
+### Option 2: Supabase Dashboard (SQL Editor)
+1. Go to your Supabase dashboard
+2. Navigate to **SQL Editor**
+3. Copy/paste migration file contents from `supabase/migrations/`
+4. Click **Run**
+
+### Option 3: Supabase CLI (Cloud Supabase only)
+```bash
+# Install Supabase CLI
+npm install -g supabase
+
+# Login
+supabase login
+
+# Link your project
+supabase link --project-ref your-project-ref
+
+# Push migrations
+supabase db push
+```

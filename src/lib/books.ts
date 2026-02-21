@@ -145,31 +145,14 @@ export async function updateBook(id: string, formData: Partial<BookFormData>) {
 }
 
 export async function deleteBook(id: string) {
-  // Delete related chat_log records first (foreign key constraint)
-  const { error: chatLogError } = await supabase
-    .from('chat_log')
-    .delete()
-    .eq('book_id', id)
+  // Use API route with service role key to bypass RLS for cascade deletes
+  const response = await fetch(`/api/delete-book?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
 
-  if (chatLogError) {
-    throw new Error(`Failed to delete related chat logs: ${chatLogError.message}`)
-  }
-
-  // Delete related summaries_v2 records (foreign key constraint)
-  const { error: summariesError } = await supabase
-    .from('summaries_v2')
-    .delete()
-    .eq('book_id', id)
-
-  if (summariesError) {
-    throw new Error(`Failed to delete related summaries: ${summariesError.message}`)
-  }
-
-  // Now delete the book
-  const { error } = await supabase.from('books').delete().eq('id', id)
-
-  if (error) {
-    throw new Error(`Failed to delete book: ${error.message}`)
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.error || 'Failed to delete book')
   }
 
   return { success: true }
