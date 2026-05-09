@@ -35,6 +35,8 @@ export default async function DashboardLayout({
       safeRedirect('/login')
     }
 
+    const authenticatedUser = user!
+
     return (
       <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
         {/* Desktop Sidebar - hidden on mobile */}
@@ -78,7 +80,7 @@ export default async function DashboardLayout({
               bgcolor: 'background.paper',
             }}
           >
-            <DashboardHeader userEmail={user.email} />
+            <DashboardHeader userEmail={authenticatedUser.email} />
           </Box>
 
           {/* Page content */}
