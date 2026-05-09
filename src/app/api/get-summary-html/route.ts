@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const N8N_BASE_URL = process.env.N8N_BASE_URL
-const N8N_WEBHOOK_URL = `${N8N_BASE_URL}/webhook/get_summary_html`
+import { getN8nWebhookConfig } from '@/lib/n8n-webhooks'
 
 const allowedStyles = new Set(['narrative', 'bullet_points', 'workbook'])
 const allowedLengths = new Set(['short', 'medium', 'long'])
 
 export async function POST(request: NextRequest) {
-  if (!N8N_BASE_URL) {
-    return NextResponse.json(
-      { error: 'N8N_BASE_URL environment variable is not configured' },
-      { status: 500 }
-    )
-  }
-
   try {
+    const { url, headers } = getN8nWebhookConfig('get_summary_html')
+
     const body = await request.json()
     const { book_id } = body ?? {}
     const style = body?.preferences?.style ?? body?.style
@@ -27,10 +20,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const response = await fetch(N8N_WEBHOOK_URL, {
+    const payload = {
+      book_id,
+      style,
+      length,
+      preferences: { style, length },
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ book_id, preferences: { style, length } }),
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     })
 
     if (!response.ok) {
@@ -45,13 +48,26 @@ export async function POST(request: NextRequest) {
     const rawBody = await response.text()
     let html = ''
 
+    if (!rawBody.trim()) {
+      return NextResponse.json(
+        { error: 'n8n webhook returned an empty response body' },
+        { status: 502 }
+      )
+    }
+
     if (contentType.includes('application/json')) {
-      if (rawBody.trim()) {
-        const data = JSON.parse(rawBody)
-        html = data?.html ?? data?.data?.html ?? ''
-        if (!html) {
-          html = JSON.stringify(data)
-        }
+      const data = JSON.parse(rawBody) as {
+        html?: string
+        body?: { html?: string }
+        data?: { html?: string }
+        output?: string
+      }
+      html = data?.html ?? data?.body?.html ?? data?.data?.html ?? data?.output ?? ''
+      if (!html) {
+        return NextResponse.json(
+          { error: `n8n webhook JSON response did not include html. Keys: ${Object.keys(data).join(', ') || '(none)'}` },
+          { status: 502 }
+        )
       }
     } else {
       html = rawBody

@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const N8N_BASE_URL = process.env.N8N_BASE_URL
-const N8N_WEBHOOK_URL = `${N8N_BASE_URL}/webhook/ingest_book`
+import { getN8nWebhookConfig } from '@/lib/n8n-webhooks'
 
 export async function POST(request: NextRequest) {
-  // Validate environment variable
-  if (!N8N_BASE_URL) {
-    return NextResponse.json(
-      { error: 'N8N_BASE_URL environment variable is not configured' },
-      { status: 500 }
-    )
-  }
   try {
+    const { url, headers } = getN8nWebhookConfig('ingest_book')
+
     // Get the form data from the request
     const formData = await request.formData()
 
     // Forward the request to n8n webhook
-    const response = await fetch(N8N_WEBHOOK_URL, {
+    const response = await fetch(url, {
       method: 'POST',
+      headers,
       body: formData,
     })
 

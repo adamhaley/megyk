@@ -28,16 +28,12 @@ export default async function DashboardLayout({
     const supabase = await createServerComponentClient()
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (!user) {
       safeRedirect('/login')
     }
-
-    // TypeScript assertion: session is guaranteed to be non-null here
-    // because redirect() throws and never returns
-    const userSession = session!
 
     return (
       <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -82,7 +78,7 @@ export default async function DashboardLayout({
               bgcolor: 'background.paper',
             }}
           >
-            <DashboardHeader userEmail={userSession.user.email} />
+            <DashboardHeader userEmail={user.email} />
           </Box>
 
           {/* Page content */}

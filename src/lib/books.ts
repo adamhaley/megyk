@@ -41,19 +41,25 @@ export async function getBooks(filters: Partial<BookFilters> = {}) {
     // Get summary counts for all books
     const { data: summaryCounts, error: summaryError } = await supabase
       .from('summaries_v2')
-      .select('book_id')
+      .select('book_id, style, length')
       .in('book_id', bookIds)
 
     if (!summaryError && summaryCounts) {
-      // Count summaries per book
-      const countsByBookId = summaryCounts.reduce((acc: Record<string, number>, item: { book_id: string }) => {
-        acc[item.book_id] = (acc[item.book_id] || 0) + 1
+      // Count unique style/length combinations per book to match the detail page.
+      const countsByBookId = summaryCounts.reduce((acc: Record<string, Set<string>>, item: { book_id: string; style: string; length: string }) => {
+        if (!acc[item.book_id]) {
+          acc[item.book_id] = new Set()
+        }
+        acc[item.book_id].add(`${item.style}:${item.length}`)
         return acc
       }, {})
 
-      // Add summary_count to each book
       books.forEach((book) => {
-        book.summary_count = countsByBookId[book.id] || 0
+        book.summary_count = countsByBookId[book.id]?.size || 0
+      })
+    } else {
+      books.forEach((book) => {
+        book.summary_count = 0
       })
     }
   }

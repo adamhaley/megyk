@@ -167,6 +167,7 @@ export default function BookList({
                       src={book.cover_image_url}
                       alt={`${book.title} cover`}
                       fill
+                      sizes="80px"
                       style={{
                         objectFit: 'cover',
                         borderRadius: '4px',
